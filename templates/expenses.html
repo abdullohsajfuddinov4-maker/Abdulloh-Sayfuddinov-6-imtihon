@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}Расходы - FinTracker{% endblock %}
+
+{% block content %}
+<style>
+    .expenses-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .expenses-header h1 {
+        font-size: 2rem;
+        color: #333;
+        margin: 0;
+    }
+
+    .add-expense-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.8rem 2rem;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .add-expense-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem;
+        border-radius: 15px;
+        color: white;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .stat-card h3 {
+        font-size: 0.9rem;
+        font-weight: 500;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-card .amount {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    .filters {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        background: white;
+        border: 2px solid #e0e0e0;
+        padding: 0.6rem 1.5rem;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        color: #666;
+    }
+
+    .filter-btn:hover {
+        border-color: #667eea;
+        color: #667eea;
+    }
+
+    .filter-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+    }
+
+    .expenses-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .expenses-table thead {
+        background: #f8f9fa;
+    }
+
+    .expenses-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #666;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .expenses-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .expenses-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .category-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background: #e3f2fd;
+        color: #1976d2;
+    }
+
+    .amount-cell {
+        font-weight: 600;
+        color: #f44336;
+        font-size: 1.1rem;
+    }
+
+    .date-cell {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #999;
+    }
+
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: #666;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #999;
+    }
+
+    @media (max-width: 768px) {
+        .expenses-table {
+            font-size: 0.9rem;
+        }
+
+        .expenses-table th,
+        .expenses-table td {
+            padding: 0.7rem 0.5rem;
+        }
+
+        .stat-card .amount {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<div class="expenses-header">
+    <h1>💸 Мои расходы</h1>
+    <button class="add-expense-btn" onclick="window.location.href='{% url 'add_expense' %}'">
+        + Добавить расход
+    </button>
+</div>
+
+<div class="stats-cards">
+    <div class="stat-card">
+        <h3>Всего потрачено</h3>
+        <div class="amount">{{ total|floatformat:0 }} ₽</div>
+    </div>
+    <div class="stat-card">
+        <h3>Количество операций</h3>
+        <div class="amount">{{ expenses|length }}</div>
+    </div>
+</div>
+
+<div class="filters">
+    <h3 style="margin-bottom: 1rem; color: #333;">Фильтр по периоду:</h3>
+    <div class="filter-buttons">
+        <button class="filter-btn {% if not period %}active{% endif %}"
+                onclick="window.location.href='{% url 'full_expenses' %}'">
+            Все время
+        </button>
+        <button class="filter-btn {% if period == 'day' %}active{% endif %}"
+                onclick="window.location.href='{% url 'full_expenses' %}?period=day'">
+            Сегодня
+        </button>
+        <button class="filter-btn {% if period == 'week' %}active{% endif %}"
+                onclick="window.location.href='{% url 'full_expenses' %}?period=week'">
+            Неделя
+        </button>
+        <button class="filter-btn {% if period == 'month' %}active{% endif %}"
+                onclick="window.location.href='{% url 'full_expenses' %}?period=month'">
+            Месяц
+        </button>
+        <button class="filter-btn {% if period == 'year' %}active{% endif %}"
+                onclick="window.location.href='{% url 'full_expenses' %}?period=year'">
+            Год
+        </button>
+    </div>
+</div>
+
+{% if expenses %}
+<table class="expenses-table">
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Категория</th>
+            <th>Описание</th>
+            <th>Сумма</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for expense in expenses %}
+        <tr>
+            <td class="date-cell">{{ expense.date|date:"d.m.Y" }}</td>
+            <td>
+                <span class="category-badge">{{ expense.category|default:"Без категории" }}</span>
+            </td>
+            <td>{{ expense.description|default:"—" }}</td>
+            <td class="amount-cell">-{{ expense.amount|floatformat:0 }} ₽</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <div class="empty-state-icon">📭</div>
+    <h3>Пока нет расходов</h3>
+    <p>Начните отслеживать свои траты, добавив первый расход</p>
+</div>
+{% endif %}
+
+{% endblock %}

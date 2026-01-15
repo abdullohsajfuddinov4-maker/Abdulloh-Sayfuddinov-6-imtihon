@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+
+{% block title %}Добавить расход - FinTracker{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-header h1 {
+        font-size: 2rem;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-header p {
+        color: #666;
+    }
+
+    .expense-form {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 0.9rem 1.2rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: white;
+        font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-group textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-group input[type="number"] {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+
+    .category-option {
+        position: relative;
+    }
+
+    .category-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .category-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        min-height: 100px;
+    }
+
+    .category-option input[type="radio"]:checked + .category-label {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: transparent;
+        transform: scale(1.05);
+    }
+
+    .category-label:hover {
+        border-color: #667eea;
+        transform: translateY(-2px);
+    }
+
+    .category-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .category-name {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .error-message {
+        background: #ffebee;
+        color: #c62828;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #c62828;
+    }
+
+    .success-message {
+        background: #e8f5e9;
+        color: #2e7d32;
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #2e7d32;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: white;
+        color: #666;
+        border: 2px solid #e0e0e0;
+    }
+
+    .btn-secondary:hover {
+        border-color: #667eea;
+        color: #667eea;
+    }
+
+    @media (max-width: 768px) {
+        .category-grid {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-header">
+        <h1>💸 Добавить расход</h1>
+        <p>Отслеживайте свои траты легко и удобно</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags == 'error' %}error-message{% else %}success-message{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" class="expense-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="amount">Сумма *</label>
+            <input type="number" 
+                   id="amount" 
+                   name="amount" 
+                   step="0.01" 
+                   min="0.01" 
+                   placeholder="0.00 ₽" 
+                   required
+                   value="{{ form.amount.value|default:'' }}">
+        </div>
+
+        <div class="form-group">
+            <label>Категория *</label>
+            <div class="category-grid">
+                <div class="category-option">
+                    <input type="radio" id="cat-food" name="category" value="Еда" 
+                           {% if form.category.value == 'Еда' %}checked{% endif %}>
+                    <label for="cat-food" class="category-label">
+                        <span class="category-icon">🍔</span>
+                        <span class="category-name">Еда</span>
+                    </label>
+                </div>
+
+                <div class="category-option">
+                    <input type="radio" id="cat-transport" name="category" value="Транспорт"
+                           {% if form.category.value == 'Транспорт' %}checked{% endif %}>
+                    <label for="cat-transport" class="category-label">
+                        <span class="category-icon">🚗</span>
+                        <span class="category-name">Транспорт</span>
+                    </label>
+                </div>
+
+                <div class="category-option">
+                    <input type="radio" id="cat-shopping" name="category" value="Покупки"
+                           {% if form.category.value == 'Покупки' %}checked{% endif %}>
+                    <label for="cat-shopping" class="category-label">
+                        <span class="category-icon">🛍️</span>
+                        <span class="category-name">Покупки</span>
+                    </label>
+                </div>
+
+                <div class="category-option">
+                    <input type="radio" id="cat-health" name="category" value="Здоровье"
+                           {% if form.category.value == 'Здоровье' %}checked{% endif %}>
+                    <label for="cat-health" class="category-label">
+                        <span class="category-icon">💊</span>
+                        <span class="category-name">Здоровье</span>
+                    </label>
+                </div>
+
+                <div class="category-option">
+                    <input type="radio" id="cat-entertainment" name="category" value="Развлечения"
+                           {% if form.category.value == 'Развлечения' %}checked{% endif %}>
+                    <label for="cat-entertainment" class="category-label">
+                        <span class="category-icon">🎮</span>
+                        <span class="category-name">Развлечения</span>
+                    </label>
+                </div>
+
+                <div class="category-option">
+                    <input type="radio" id="cat-bills" name="category" value="Счета"
+                           {% if form.category.value == 'Счета' %}checked{% endif %}>
+                    <label for="cat-bills" class="category-label">
+                        <span class="category-icon">💡</span>
+                        <span class="category-name">Счета</span>
+                    </label>
+                </div>
+
+                <div class="category-option">
+                    <input type="radio" id="cat-education" name="category" value="Образование"
+                           {% if form.category.value == 'Образование' %}checked{% endif %}>
+                    <label for="cat-education" class="category-label">
+                        <span class="category-icon">📚</span>
+                        <span class="category-name">Образование</span>
+                    </label>
+                </div>
+
+                <div class="category-option">
+                    <input type="radio" id="cat-other" name="category" value="Другое"
+                           {% if form.category.value == 'Другое' %}checked{% endif %}>
+                    <label for="cat-other" class="category-label">
+                        <span class="category-icon">📦</span>
+                        <span class="category-name">Другое</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="date">Дата *</label>
+            <input type="date" 
+                   id="date" 
+                   name="date" 
+                   required
+                   value="{{ form.date.value|default:'' }}">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Описание (необязательно)</label>
+            <textarea id="description" 
+                      name="description" 
+                      placeholder="Например: Обед в кафе, такси до работы...">{{ form.description.value|default:'' }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'full_expenses' %}'">
+                Отмена
+            </button>
+            <button type="submit" class="btn btn-primary">
+                ✓ Сохранить расход
+            </button>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
