@@ -239,40 +239,31 @@
 
 {% if wallets %}
     <div class="total-summary">
-        <h3>💼 Общий баланс</h3>
-        <div class="amounts">
-            {% load mathfilters %}
-            <div class="amount-item">
+        <h3>💼 Мои финансы</h3>
+        <div class="amounts" style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+            <div class="amount-item" style="flex: 1; min-width: 200px;">
                 <div class="amount">
-                    {% widthratio wallets.0.balance 1 0 as uzs_total %}
-                    {% for wallet in wallets %}
-                        {% if wallet.currency == 'UZS' %}
-                            {% widthratio uzs_total|add:wallet.balance 1 1 as uzs_total %}
-                        {% endif %}
-                    {% endfor %}
-                    {{ uzs_total|default:0|floatformat:0 }} сум
+                    {{ total_non_visa_balance|floatformat:0 }} сум
                 </div>
-                <div class="currency">Узбекский сум</div>
+                <div class="currency">Местный баланс (UzCard/Наличные)</div>
             </div>
-            
-            <div class="amount-item">
-                <div class="amount">
-                    {% widthratio wallets.0.balance 1 0 as usd_total %}
-                    {% for wallet in wallets %}
-                        {% if wallet.currency == 'USD' %}
-                            {% widthratio usd_total|add:wallet.balance 1 1 as usd_total %}
-                        {% endif %}
-                    {% endfor %}
-                    {{ usd_total|default:0|floatformat:2 }} $
-                </div>
-                <div class="currency">Доллар США</div>
-            </div>
+
+            <div class="amount-item" style="flex: 1; min-width: 200px; border-left: 2px solid rgba(255,255,255,0.2); padding-left: 20px;">
+    <div class="amount" style="color: white; font-weight: bold;">
+        {{ total_visa_balance|floatformat:2 }} $
+    </div>
+    <div class="currency" style="color: rgba(255,255,255,0.8); font-size: 14px;">
+        Валютный счет (Visa)
+    </div>
+</div>
+
         </div>
     </div>
 
     <div class="wallet-grid">
         {% for wallet in wallets %}
-            <div class="wallet-card {{ wallet.type }}">
+            <div class="wallet-card {{ wallet.type }} {% if wallet.type == 'visa' %}visa-card{% endif %}">
                 <div class="wallet-header">
                     <span class="wallet-type-badge {{ wallet.type }}">
                         {% if wallet.type == 'cash' %}
@@ -284,28 +275,27 @@
                         {% endif %}
                     </span>
                 </div>
-                
+
                 <div class="wallet-name">{{ wallet.name }}</div>
-                
+
                 <div class="wallet-balance">
                     {{ wallet.balance|floatformat:0 }}
+                    <span style="font-size: 14px; font-weight: normal;">
+                        {% if wallet.currency == 'UZS' %}сум{% else %}${% endif %}
+                    </span>
                 </div>
-                
+
                 <div class="wallet-currency">
-                    {% if wallet.currency == 'UZS' %}
-                        Узбекский сум
-                    {% else %}
-                        Доллар США
-                    {% endif %}
+                    {% if wallet.currency == 'UZS' %}Узбекский сум{% else %}Доллар США{% endif %}
                 </div>
-                
+
                 <div class="wallet-actions">
                     <a href="{% url 'wallet_detail' wallet.pk %}" class="wallet-btn wallet-btn-view">
-                        👁️ Смотреть
+                        👁️ Подробнее
                     </a>
                     <form method="post" action="{% url 'wallet_delete' wallet.pk %}" style="flex: 1;" onsubmit="return confirm('Удалить кошелёк {{ wallet.name }}?');">
                         {% csrf_token %}
-                        <button type="submit" class="wallet-btn wallet-btn-delete" style="width: 100%;">
+                        <button type="submit" class="wallet-btn wallet-btn-delete" style="width: 100%; cursor: pointer;">
                             🗑️ Удалить
                         </button>
                     </form>
@@ -321,4 +311,27 @@
         <a href="{% url 'wallet_add' %}" class="btn">+ Создать первый кошелёк</a>
     </div>
 {% endif %}
+
+<style>
+    /* Добавь немного стиля для выделения Visa, так как она не входит в общий счет */
+    .visa-card {
+        border: 1px dashed #ccc;
+        opacity: 0.9;
+        background: #fdfdfd;
+    }
+    .wallet-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        padding: 8px;
+        border-radius: 6px;
+        font-size: 13px;
+        border: none;
+        transition: 0.2s;
+    }
+    .wallet-btn-view { background: #e3f2fd; color: #1976d2; }
+    .wallet-btn-delete { background: #ffebee; color: #c62828; }
+    .wallet-btn:hover { opacity: 0.8; }
+</style>
 {% endblock %}

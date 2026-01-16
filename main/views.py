@@ -208,14 +208,46 @@ class TransactionDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class WalletListView(LoginRequiredMixin, ListView):
+from django.db.models import Sum
 
+
+class WalletListView(LoginRequiredMixin, ListView):
     model = Wallet
     template_name = 'main/wallet_list.html'
     context_object_name = 'wallets'
 
     def get_queryset(self):
         return Wallet.objects.filter(user=self.request.user).order_by('-balance')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        total_non_visa = Wallet.objects.filter(
+            user=self.request.user
+        ).exclude(
+            type='visa'
+        ).aggregate(
+            total=Sum('balance')
+        )['total'] or 0
+
+        total_visa = Wallet.objects.filter(
+            user=self.request.user,
+            type='visa'
+        ).aggregate(
+            total=Sum('balance')
+        )['total'] or 0
+
+        total_all = Wallet.objects.filter(
+            user=self.request.user
+        ).aggregate(
+            total=Sum('balance')
+        )['total'] or 0
+
+        context['total_non_visa_balance'] = total_non_visa
+        context['total_visa_balance'] = total_visa
+        context['total_all_balance'] = total_all
+
+        return context
 
 
 class WalletCreateView(LoginRequiredMixin, CreateView):
@@ -266,7 +298,6 @@ class WalletDeleteView(LoginRequiredMixin, DeleteView):
 
 
 class TopUpView(LoginRequiredMixin, CreateView):
-
     template_name = 'main/topup_form.html'
     form_class = TopUpForm
     success_url = reverse_lazy('dashboard')
@@ -278,8 +309,6 @@ class TopUpView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-
-
         wallet = None
         if 'wallet_id' in self.kwargs:
             wallet = get_object_or_404(
@@ -287,40 +316,26 @@ class TopUpView(LoginRequiredMixin, CreateView):
                 id=self.kwargs['wallet_id'],
                 user=self.request.user
             )
-
         kwargs.update({
             'user': self.request.user,
             'wallet': wallet,
         })
-
         return kwargs
 
     def form_valid(self, form):
-
-        form.instance.user = self.request.user
-
-
         transaction = form.save()
-
-
-        wallet = transaction.wallet
         if transaction.type == 'income':
-            wallet.balance += transaction.amount
             messages.success(
                 self.request,
-                f'✅ Кошелёк "{wallet.name}" пополнен на {transaction.amount} {wallet.currency}'
+                f'✅ Кошелёк "{transaction.wallet.name}" пополнен на {transaction.amount} {transaction.wallet.currency}'
             )
         else:
-            wallet.balance -= transaction.amount
             messages.success(
                 self.request,
-                f'💸 С кошелька "{wallet.name}" снято {transaction.amount} {wallet.currency}'
+                f'💸 С кошелька "{transaction.wallet.name}" снято {transaction.amount} {transaction.wallet.currency}'
             )
 
-        wallet.save()
-
-
         if 'wallet_id' in self.kwargs:
-            return redirect('wallet_detail', pk=wallet.pk)
+            return redirect('wallet_detail', pk=transaction.wallet.pk)
 
         return redirect(self.success_url)
