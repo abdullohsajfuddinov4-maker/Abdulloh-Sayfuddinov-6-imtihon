@@ -86,11 +86,17 @@
 </style>
 {% endblock %}
 
+{% load i18n %}
+
 {% block content %}
 <div class="profile-container">
     <div class="profile-header">
         <div class="avatar-section">
-            <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="avatar">
+            {% if user.avatar %}
+                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="avatar">
+            {% else %}
+                <div class="avatar-placeholder">👤</div>
+            {% endif %}
         </div>
         <div class="username">{{ user.username }}</div>
         <div class="user-email">{{ user.email }}</div>
@@ -98,32 +104,32 @@
 
     <div class="profile-stats">
         <div class="stat-card">
-            <div class="stat-label">Кошельков</div>
+            <div class="stat-label">{% trans "Кошельков" %}</div>
             <div class="stat-value">{{ user.wallets.count }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Транзакций</div>
+            <div class="stat-label">{% trans "Транзакций" %}</div>
             <div class="stat-value">{{ user.transaction_set.count }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Категорий</div>
+            <div class="stat-label">{% trans "Категорий" %}</div>
             <div class="stat-value">{{ user.category_set.count }}</div>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header">Редактировать профиль</div>
-        
+        <div class="card-header">{% trans "Редактировать профиль" %}</div>
+
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
             <div class="form-group">
-                <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
-                <input type="text" 
-                       name="username" 
-                       class="form-control" 
+                <label for="{{ form.username.id_for_label }}">{% trans "Имя пользователя" %}</label>
+                <input type="text"
+                       name="username"
+                       class="form-control"
                        id="{{ form.username.id_for_label }}"
-                       value="{{ form.username.value }}"
+                       value="{{ form.username.value|default:'' }}"
                        required>
                 {% if form.username.errors %}
                     <ul class="errorlist">
@@ -135,12 +141,12 @@
             </div>
 
             <div class="form-group">
-                <label for="{{ form.email.id_for_label }}">Email</label>
-                <input type="email" 
-                       name="email" 
-                       class="form-control" 
+                <label for="{{ form.email.id_for_label }}">{% trans "Email" %}</label>
+                <input type="email"
+                       name="email"
+                       class="form-control"
                        id="{{ form.email.id_for_label }}"
-                       value="{{ form.email.value }}"
+                       value="{{ form.email.value|default:'' }}"
                        required>
                 {% if form.email.errors %}
                     <ul class="errorlist">
@@ -152,10 +158,10 @@
             </div>
 
             <div class="form-group">
-                <label for="{{ form.phone_number.id_for_label }}">Телефон</label>
-                <input type="number" 
-                       name="phone_number" 
-                       class="form-control" 
+                <label for="{{ form.phone_number.id_for_label }}">{% trans "Телефон" %}</label>
+                <input type="text"
+                       name="phone_number"
+                       class="form-control"
                        id="{{ form.phone_number.id_for_label }}"
                        value="{{ form.phone_number.value|default:'' }}">
                 {% if form.phone_number.errors %}
@@ -168,9 +174,9 @@
             </div>
 
             <div class="form-group">
-                <label for="{{ form.address.id_for_label }}">Адрес</label>
-                <textarea name="address" 
-                          class="form-control" 
+                <label for="{{ form.address.id_for_label }}">{% trans "Адрес" %}</label>
+                <textarea name="address"
+                          class="form-control"
                           id="{{ form.address.id_for_label }}"
                           rows="3">{{ form.address.value|default:'' }}</textarea>
                 {% if form.address.errors %}
@@ -183,10 +189,10 @@
             </div>
 
             <div class="form-group">
-                <label for="{{ form.avatar.id_for_label }}">Аватар</label>
-                <input type="file" 
-                       name="avatar" 
-                       class="form-control" 
+                <label for="{{ form.avatar.id_for_label }}">{% trans "Аватар" %}</label>
+                <input type="file"
+                       name="avatar"
+                       class="form-control"
                        id="{{ form.avatar.id_for_label }}"
                        accept="image/*">
                 {% if form.avatar.errors %}
@@ -199,8 +205,8 @@
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="btn" style="flex: 1;">💾 Сохранить</button>
-                <a href="{% url 'logout' %}" class="btn btn-logout" style="flex: 1;">🚪 Выйти</a>
+                <button type="submit" class="btn">💾 {% trans "Сохранить" %}</button>
+                <a href="{% url 'logout' %}" class="btn btn-logout">🚪 {% trans "Выйти" %}</a>
             </div>
         </form>
     </div>
