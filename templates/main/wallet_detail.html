@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ wallet.name }} - Детали кошелька{% endblock %}
+
+{% block extra_css %}
+<style>
+    .wallet-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 40px 30px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .wallet-header.cash {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .wallet-header.uzcard {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .wallet-header.visa {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .back-button {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        display: inline-block;
+        margin-bottom: 20px;
+        transition: color 0.3s;
+    }
+
+    .back-button:hover {
+        color: #fff;
+    }
+
+    .wallet-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .wallet-name-section h1 {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+
+    .wallet-type-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 20px;
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+
+    .wallet-balance-section {
+        text-align: right;
+    }
+
+    .wallet-balance {
+        font-size: 48px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .wallet-currency {
+        opacity: 0.9;
+        font-size: 16px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons .btn {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .transactions-section {
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .section-header h2 {
+        color: #333;
+        font-size: 22px;
+    }
+
+    .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        border-bottom: 1px solid #f5f5f5;
+        transition: background 0.3s;
+    }
+
+    .transaction-item:hover {
+        background: #f9f9f9;
+    }
+
+    .transaction-item:last-child {
+        border-bottom: none;
+    }
+
+    .transaction-icon {
+        font-size: 32px;
+        margin-right: 15px;
+    }
+
+    .transaction-info {
+        flex: 1;
+    }
+
+    .transaction-category {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .transaction-date {
+        font-size: 13px;
+        color: #999;
+    }
+
+    .transaction-description {
+        font-size: 13px;
+        color: #666;
+        margin-top: 5px;
+    }
+
+    .transaction-amount {
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .transaction-amount.income {
+        color: #4CAF50;
+    }
+
+    .transaction-amount.outcome {
+        color: #f44336;
+    }
+
+    .empty-transactions {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .empty-transactions-icon {
+        font-size: 72px;
+        margin-bottom: 20px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .stat-box {
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #999;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .stat-value.positive {
+        color: #4CAF50;
+    }
+
+    .stat-value.negative {
+        color: #f44336;
+    }
+
+    @media (max-width: 768px) {
+        .wallet-info {
+            flex-direction: column;
+        }
+
+        .wallet-balance-section {
+            text-align: left;
+        }
+
+        .wallet-name-section h1 {
+            font-size: 28px;
+        }
+
+        .wallet-balance {
+            font-size: 36px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .action-buttons .btn {
+            width: 100%;
+        }
+
+        .transaction-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wallet-header {{ wallet.type }}">
+    <a href="{% url 'wallet_list' %}" class="back-button">← Вернуться к кошелькам</a>
+    
+    <div class="wallet-info">
+        <div class="wallet-name-section">
+            <span class="wallet-type-badge">
+                {% if wallet.type == 'cash' %}
+                    💵 Наличные
+                {% elif wallet.type == 'uzcard' %}
+                    💳 UzCard
+                {% elif wallet.type == 'visa' %}
+                    💎 Visa
+                {% endif %}
+            </span>
+            <h1>{{ wallet.name }}</h1>
+            <div style="opacity: 0.9; font-size: 14px;">
+                Создан: {{ wallet.created_at|date:"d F Y" }}
+            </div>
+        </div>
+        
+        <div class="wallet-balance-section">
+            <div class="wallet-balance">{{ wallet.balance|floatformat:0 }}</div>
+            <div class="wallet-currency">
+                {% if wallet.currency == 'UZS' %}
+                    Узбекский сум
+                {% else %}
+                    Доллар США
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Быстрые действия -->
+<div class="action-buttons">
+    <a href="{% url 'wallet_manage' wallet.pk %}" class="btn">
+        💸 Пополнить / Снять
+    </a>
+</div>
+
+<!-- Статистика -->
+<div class="stats-grid">
+    <div class="stat-box">
+        <div class="stat-label">📊 Всего транзакций</div>
+        <div class="stat-value">{{ transactions|length }}</div>
+    </div>
+    
+    <div class="stat-box">
+        <div class="stat-label">📈 Доходов</div>
+        <div class="stat-value positive">
+            {% widthratio transactions.0.amount 1 0 as income_total %}
+            {% for t in transactions %}
+                {% if t.type == 'income' %}
+                    {% widthratio income_total|add:t.amount 1 1 as income_total %}
+                {% endif %}
+            {% endfor %}
+            +{{ income_total|default:0|floatformat:0 }}
+        </div>
+    </div>
+    
+    <div class="stat-box">
+        <div class="stat-label">📉 Расходов</div>
+        <div class="stat-value negative">
+            {% widthratio transactions.0.amount 1 0 as outcome_total %}
+            {% for t in transactions %}
+                {% if t.type == 'outcome' %}
+                    {% widthratio outcome_total|add:t.amount 1 1 as outcome_total %}
+                {% endif %}
+            {% endfor %}
+            -{{ outcome_total|default:0|floatformat:0 }}
+        </div>
+    </div>
+</div>
+
+<!-- Транзакции -->
+<div class="transactions-section">
+    <div class="section-header">
+        <h2>🕒 История операций</h2>
+    </div>
+    
+    {% if transactions %}
+        {% for transaction in transactions %}
+            <div class="transaction-item">
+                <div class="transaction-icon">
+                    {% if transaction.category %}
+                        {{ transaction.category.icon|default:"💰" }}
+                    {% else %}
+                        💰
+                    {% endif %}
+                </div>
+                
+                <div class="transaction-info">
+                    <div class="transaction-category">
+                        {{ transaction.category.name|default:"Без категории" }}
+                    </div>
+                    <div class="transaction-date">
+                        {{ transaction.created_at|date:"d.m.Y H:i" }}
+                    </div>
+                    {% if transaction.description %}
+                        <div class="transaction-description">
+                            {{ transaction.description }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="transaction-amount {{ transaction.type }}">
+                    {% if transaction.type == 'income' %}+{% else %}-{% endif %}
+                    {{ transaction.amount|floatformat:0 }}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-transactions">
+            <div class="empty-transactions-icon">📭</div>
+            <h3>Пока нет транзакций</h3>
+            <p>Добавьте первую операцию для этого кошелька</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from users.models import CustomUser
 
@@ -5,6 +6,10 @@ class Category(models.Model):
     TYPES = (
         ("income", "Income"),
         ("outcome", "Outcome"),
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
     )
     name = models.CharField(max_length=100)
     type = models.CharField(max_length=15, choices=TYPES)

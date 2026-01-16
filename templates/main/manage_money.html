@@ -1,0 +1,490 @@
+{% extends 'base.html' %}
+
+{% block title %}Управление средствами{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .selected-wallet-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 30px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+    }
+
+    .selected-wallet-banner.cash {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .selected-wallet-banner.uzcard {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .selected-wallet-banner.visa {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .wallet-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 20px;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .wallet-name {
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .wallet-balance {
+        font-size: 36px;
+        font-weight: bold;
+        margin-top: 10px;
+    }
+
+    .operation-tabs {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+    .operation-tab {
+        flex: 1;
+        padding: 20px;
+        text-align: center;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: #fff;
+        border: 3px solid transparent;
+    }
+
+    .operation-tab input[type="radio"] {
+        display: none;
+    }
+
+    .operation-tab.active {
+        border-color: #4CAF50;
+        background: #f1f8f4;
+    }
+
+    .operation-tab.income.active {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%);
+        border-color: #11998e;
+    }
+
+    .operation-tab.outcome.active {
+        background: linear-gradient(135deg, rgba(238, 9, 121, 0.1) 0%, rgba(255, 106, 0, 0.1) 100%);
+        border-color: #ee0979;
+    }
+
+    .tab-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+
+    .tab-label {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .wallet-select-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .wallet-select-item {
+        padding: 20px;
+        background: #f9f9f9;
+        border: 3px solid #e0e0e0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+    .wallet-select-item:hover {
+        border-color: #4CAF50;
+        background: #f1f8f4;
+    }
+
+    .wallet-select-item.selected {
+        border-color: #4CAF50;
+        background: #f1f8f4;
+    }
+
+    .wallet-select-item input {
+        display: none;
+    }
+
+    .wallet-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+
+    .wallet-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .wallet-bal {
+        color: #4CAF50;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .amount-input {
+        font-size: 32px !important;
+        font-weight: bold;
+        text-align: center;
+        color: #4CAF50;
+        padding: 20px !important;
+        border: 3px solid #e0e0e0 !important;
+    }
+
+    .amount-input.withdraw-mode {
+        color: #f44336;
+    }
+
+    .quick-amounts {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin: 15px 0 25px;
+    }
+
+    .quick-btn {
+        padding: 12px;
+        background: #f5f5f5;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .quick-btn:hover {
+        background: #e0e0e0;
+        border-color: #4CAF50;
+        color: #4CAF50;
+    }
+
+    .category-section {
+        margin-bottom: 25px;
+    }
+
+    .category-toggle {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .toggle-btn {
+        flex: 1;
+        padding: 10px;
+        background: #f5f5f5;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-weight: 600;
+    }
+
+    .toggle-btn.active {
+        background: #4CAF50;
+        color: #fff;
+        border-color: #4CAF50;
+    }
+
+    .category-select {
+        display: none;
+    }
+
+    .category-select.active {
+        display: block;
+    }
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .category-item {
+        padding: 12px;
+        background: #f9f9f9;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+    .category-item:hover {
+        border-color: #4CAF50;
+        background: #f1f8f4;
+    }
+
+    .category-item.selected {
+        border-color: #4CAF50;
+        background: #f1f8f4;
+    }
+
+    .create-category-input {
+        display: none;
+        margin-top: 15px;
+    }
+
+    .create-category-input.active {
+        display: block;
+    }
+
+    .btn-submit-income {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .btn-submit-outcome {
+        background: linear-gradient(135deg, #ee0979 0%, #ff6a00 100%);
+    }
+
+    @media (max-width: 768px) {
+        .wallet-select-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .quick-amounts {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .category-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1>💸 Управление средствами</h1>
+        <p style="color: #666;">Пополните или снимите деньги с кошелька</p>
+    </div>
+
+    {% if selected_wallet %}
+        <div class="selected-wallet-banner {{ selected_wallet.type }}">
+            <span class="wallet-badge">
+                {% if selected_wallet.type == 'cash' %}💵 Наличные
+                {% elif selected_wallet.type == 'uzcard' %}💳 UzCard
+                {% elif selected_wallet.type == 'visa' %}💎 Visa
+                {% endif %}
+            </span>
+            <div class="wallet-name">{{ selected_wallet.name }}</div>
+            <div class="wallet-balance">
+                {{ selected_wallet.balance|floatformat:0 }} 
+                {% if selected_wallet.currency == 'UZS' %}сум{% else %}${% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card">
+        <form method="post" id="manageForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>1. Выберите операцию</label>
+                <div class="operation-tabs">
+                    <div class="operation-tab income active" onclick="selectOperation('income')">
+                        <input type="radio" name="operation_type" value="income" id="op_income" checked>
+                        <div class="tab-icon">📥</div>
+                        <div class="tab-label">Пополнить</div>
+                    </div>
+                    <div class="operation-tab outcome" onclick="selectOperation('outcome')">
+                        <input type="radio" name="operation_type" value="outcome" id="op_outcome">
+                        <div class="tab-icon">📤</div>
+                        <div class="tab-label">Снять</div>
+                    </div>
+                </div>
+            </div>
+
+            {% if not selected_wallet %}
+                <div class="form-group">
+                    <label for="{{ form.wallet.id_for_label }}">2. Выберите кошелёк</label>
+                    <div class="wallet-select-grid">
+                        {% for wallet in form.wallet.field.queryset %}
+                            <div class="wallet-select-item" onclick="selectWallet({{ wallet.pk }})">
+                                <input type="radio" name="wallet" value="{{ wallet.pk }}" id="w_{{ wallet.pk }}">
+                                <div class="wallet-icon">
+                                    {% if wallet.type == 'cash' %}💵
+                                    {% elif wallet.type == 'uzcard' %}💳
+                                    {% elif wallet.type == 'visa' %}💎
+                                    {% endif %}
+                                </div>
+                                <div class="wallet-title">{{ wallet.name }}</div>
+                                <div class="wallet-bal">{{ wallet.balance|floatformat:0 }} {{ wallet.currency }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <input type="hidden" name="wallet" value="{{ selected_wallet.pk }}">
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.amount.id_for_label }}">{% if not selected_wallet %}3{% else %}2{% endif %}. Укажите сумму</label>
+                <input type="number" 
+                       name="amount" 
+                       step="0.01" 
+                       class="form-control amount-input" 
+                       id="{{ form.amount.id_for_label }}"
+                       placeholder="0.00"
+                       required>
+                
+                <div class="quick-amounts">
+                    <button type="button" class="quick-btn" onclick="setAmount(50000)">50 000</button>
+                    <button type="button" class="quick-btn" onclick="setAmount(100000)">100 000</button>
+                    <button type="button" class="quick-btn" onclick="setAmount(200000)">200 000</button>
+                    <button type="button" class="quick-btn" onclick="setAmount(500000)">500 000</button>
+                </div>
+            </div>
+
+            <div class="form-group category-section">
+                <label>{% if not selected_wallet %}4{% else %}3{% endif %}. Категория</label>
+                
+                <div class="category-toggle">
+                    <button type="button" class="toggle-btn active" onclick="showCategorySelect()">Выбрать</button>
+                    <button type="button" class="toggle-btn" onclick="showCategoryCreate()">Создать новую</button>
+                </div>
+
+                <div class="category-select active" id="categorySelect">
+                    <select name="category" class="form-control" id="categoryField">
+                        <option value="">Выберите категорию</option>
+                        {% for cat in categories_income %}
+                            <option value="{{ cat.pk }}" data-type="income">{{ cat.name }}</option>
+                        {% endfor %}
+                        {% for cat in categories_outcome %}
+                            <option value="{{ cat.pk }}" data-type="outcome" style="display:none;">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="create-category-input" id="categoryCreate">
+                    <input type="text" 
+                           name="new_category_name" 
+                           class="form-control" 
+                           placeholder="Например: Продукты, Зарплата">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">{% if not selected_wallet %}5{% else %}4{% endif %}. Примечание (необязательно)</label>
+                <textarea name="description" 
+                          class="form-control" 
+                          id="{{ form.description.id_for_label }}"
+                          rows="3"
+                          placeholder="Добавьте заметку..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary" style="flex: 1;">Отмена</a>
+                <button type="submit" class="btn btn-submit-income" id="submitBtn" style="flex: 1;">
+                    ✅ Пополнить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    const amountInput = document.querySelector('.amount-input');
+    const submitBtn = document.getElementById('submitBtn');
+    const categoryField = document.getElementById('categoryField');
+
+    function selectOperation(type) {
+        document.querySelectorAll('.operation-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+        document.getElementById('op_' + type).checked = true;
+        
+        if (type === 'income') {
+            amountInput.classList.remove('withdraw-mode');
+            submitBtn.className = 'btn btn-submit-income';
+            submitBtn.innerHTML = '✅ Пополнить';
+        } else {
+            amountInput.classList.add('withdraw-mode');
+            submitBtn.className = 'btn btn-submit-outcome';
+            submitBtn.innerHTML = '💸 Снять средства';
+        }
+        
+        filterCategories(type);
+    }
+
+    function filterCategories(type) {
+        const options = categoryField.querySelectorAll('option');
+        options.forEach(option => {
+            if (option.value === '') {
+                option.style.display = 'block';
+                return;
+            }
+            
+            const catType = option.getAttribute('data-type');
+            if (catType === type) {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+                if (option.selected) {
+                    categoryField.value = '';
+                }
+            }
+        });
+    }
+
+    function selectWallet(id) {
+        document.querySelectorAll('.wallet-select-item').forEach(item => {
+            item.classList.remove('selected');
+        });
+        event.currentTarget.classList.add('selected');
+        document.getElementById('w_' + id).checked = true;
+    }
+
+    function setAmount(amount) {
+        amountInput.value = amount;
+        amountInput.focus();
+    }
+
+    function showCategorySelect() {
+        document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        document.getElementById('categorySelect').classList.add('active');
+        document.getElementById('categoryCreate').classList.remove('active');
+        
+        categoryField.required = true;
+        document.querySelector('input[name="new_category_name"]').required = false;
+    }
+
+    function showCategoryCreate() {
+        document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        document.getElementById('categorySelect').classList.remove('active');
+        document.getElementById('categoryCreate').classList.add('active');
+        
+        categoryField.required = false;
+        document.querySelector('input[name="new_category_name"]').required = true;
+    }
+</script>
+{% endblock %}

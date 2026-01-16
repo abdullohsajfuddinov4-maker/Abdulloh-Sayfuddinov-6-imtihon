@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block title %}Профиль - {{ user.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 40px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .avatar-section {
+        margin-bottom: 20px;
+    }
+
+    .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 5px solid #fff;
+        object-fit: cover;
+        margin: 0 auto;
+        display: block;
+    }
+
+    .username {
+        font-size: 32px;
+        font-weight: bold;
+        margin: 15px 0 5px;
+    }
+
+    .user-email {
+        opacity: 0.9;
+        font-size: 16px;
+    }
+
+    .profile-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: #fff;
+        padding: 25px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #999;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-size: 28px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .btn-logout {
+        background: #f44336;
+    }
+
+    .btn-logout:hover {
+        background: #d32f2f;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="avatar-section">
+            <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="avatar">
+        </div>
+        <div class="username">{{ user.username }}</div>
+        <div class="user-email">{{ user.email }}</div>
+    </div>
+
+    <div class="profile-stats">
+        <div class="stat-card">
+            <div class="stat-label">Кошельков</div>
+            <div class="stat-value">{{ user.wallets.count }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Транзакций</div>
+            <div class="stat-value">{{ user.transaction_set.count }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Категорий</div>
+            <div class="stat-value">{{ user.category_set.count }}</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Редактировать профиль</div>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+                <input type="text" 
+                       name="username" 
+                       class="form-control" 
+                       id="{{ form.username.id_for_label }}"
+                       value="{{ form.username.value }}"
+                       required>
+                {% if form.username.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.username.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                <input type="email" 
+                       name="email" 
+                       class="form-control" 
+                       id="{{ form.email.id_for_label }}"
+                       value="{{ form.email.value }}"
+                       required>
+                {% if form.email.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.email.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.phone_number.id_for_label }}">Телефон</label>
+                <input type="number" 
+                       name="phone_number" 
+                       class="form-control" 
+                       id="{{ form.phone_number.id_for_label }}"
+                       value="{{ form.phone_number.value|default:'' }}">
+                {% if form.phone_number.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.phone_number.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.address.id_for_label }}">Адрес</label>
+                <textarea name="address" 
+                          class="form-control" 
+                          id="{{ form.address.id_for_label }}"
+                          rows="3">{{ form.address.value|default:'' }}</textarea>
+                {% if form.address.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.address.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.avatar.id_for_label }}">Аватар</label>
+                <input type="file" 
+                       name="avatar" 
+                       class="form-control" 
+                       id="{{ form.avatar.id_for_label }}"
+                       accept="image/*">
+                {% if form.avatar.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.avatar.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn" style="flex: 1;">💾 Сохранить</button>
+                <a href="{% url 'logout' %}" class="btn btn-logout" style="flex: 1;">🚪 Выйти</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+
+{% block title %}Добавить кошелёк{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .wallet-type-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .type-card {
+        padding: 25px 20px;
+        background: #fff;
+        border: 3px solid #e0e0e0;
+        border-radius: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .type-card:hover {
+        border-color: #bbb;
+        transform: translateY(-3px);
+    }
+
+    .type-card.active {
+        border-color: #4CAF50;
+        background: #f1f8f4;
+    }
+
+    .type-card input[type="radio"] {
+        display: none;
+    }
+
+    .type-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+    }
+
+    .type-label {
+        font-weight: 600;
+        font-size: 16px;
+        color: #333;
+    }
+
+    .currency-selector {
+        display: flex;
+        gap: 15px;
+        background: #f5f5f5;
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+    .currency-option {
+        flex: 1;
+        padding: 15px;
+        text-align: center;
+        background: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+    }
+
+    .currency-option:hover {
+        border-color: #ddd;
+    }
+
+    .currency-option.active {
+        border-color: #4CAF50;
+        background: #f1f8f4;
+    }
+
+    .currency-option input[type="radio"] {
+        display: none;
+    }
+
+    .currency-label {
+        font-size: 18px;
+        font-weight: 600;
+        display: block;
+    }
+
+    .currency-code {
+        font-size: 14px;
+        color: #999;
+        margin-top: 5px;
+    }
+
+    .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid #2196F3;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        color: #1565c0;
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin-top: 5px;
+    }
+
+    .errorlist li {
+        color: #f44336;
+        font-size: 14px;
+        background: #ffebee;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 5px;
+    }
+
+    @media (max-width: 768px) {
+        .wallet-type-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>➕ Добавить кошелёк</h1>
+        <p style="color: #666;">Создайте новый кошелёк для управления финансами</p>
+    </div>
+
+    <div class="info-box">
+        💡 <strong>Внимание:</strong> Карта VISA не может быть в валюте UZS. Выберите USD для карт VISA.
+    </div>
+
+    {% if form.non_field_errors %}
+        <ul class="errorlist">
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="card">
+        <form method="post" id="walletForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">📝 Название кошелька</label>
+                <input type="text" 
+                       name="name" 
+                       class="form-control" 
+                       id="{{ form.name.id_for_label }}"
+                       value="{{ form.name.value|default:'' }}"
+                       placeholder="Например: Основная карта, Наличные"
+                       required>
+                {% if form.name.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.name.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>💳 Тип кошелька</label>
+                <div class="wallet-type-grid">
+                    <div class="type-card" onclick="selectType('cash')">
+                        <input type="radio" name="type" value="cash" id="type_cash">
+                        <div class="type-icon">💵</div>
+                        <div class="type-label">Наличные</div>
+                    </div>
+                    
+                    <div class="type-card" onclick="selectType('uzcard')">
+                        <input type="radio" name="type" value="uzcard" id="type_uzcard" checked>
+                        <div class="type-icon">💳</div>
+                        <div class="type-label">UzCard</div>
+                    </div>
+                    
+                    <div class="type-card" onclick="selectType('visa')">
+                        <input type="radio" name="type" value="visa" id="type_visa">
+                        <div class="type-icon">💎</div>
+                        <div class="type-label">Visa</div>
+                    </div>
+                </div>
+                {% if form.type.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.type.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label>💰 Валюта</label>
+                <div class="currency-selector">
+                    <div class="currency-option" onclick="selectCurrency('UZS')">
+                        <input type="radio" name="currency" value="UZS" id="currency_uzs" checked>
+                        <span class="currency-label">🇺🇿 Сум</span>
+                        <span class="currency-code">UZS</span>
+                    </div>
+                    
+                    <div class="currency-option" onclick="selectCurrency('USD')">
+                        <input type="radio" name="currency" value="USD" id="currency_usd">
+                        <span class="currency-label">🇺🇸 Доллар</span>
+                        <span class="currency-code">USD</span>
+                    </div>
+                </div>
+                {% if form.currency.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.currency.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.balance.id_for_label }}">💵 Начальный баланс</label>
+                <input type="number" 
+                       name="balance" 
+                       step="0.01"
+                       class="form-control" 
+                       id="{{ form.balance.id_for_label }}"
+                       value="{{ form.balance.value|default:'0' }}"
+                       placeholder="0.00">
+                <span style="font-size: 13px; color: #999; margin-top: 5px; display: block;">
+                    Укажите текущую сумму в этом кошельке
+                </span>
+                {% if form.balance.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.balance.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <a href="{% url 'wallet_list' %}" class="btn btn-secondary" style="flex: 1;">Отмена</a>
+                <button type="submit" class="btn" style="flex: 1;">✅ Создать кошелёк</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function selectType(type) {
+        document.querySelectorAll('.type-card').forEach(card => {
+            card.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+        document.getElementById('type_' + type).checked = true;
+        
+        if (type === 'visa') {
+            const uzsOption = document.getElementById('currency_uzs');
+            if (uzsOption.checked) {
+                document.getElementById('currency_usd').checked = true;
+                selectCurrency('USD');
+            }
+        }
+    }
+    
+    function selectCurrency(currency) {
+        document.querySelectorAll('.currency-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        event.currentTarget.classList.add('active');
+        document.getElementById('currency_' + currency.toLowerCase()).checked = true;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const checkedType = document.querySelector('input[name="type"]:checked');
+        if (checkedType) {
+            checkedType.closest('.type-card').classList.add('active');
+        }
+        
+        const checkedCurrency = document.querySelector('input[name="currency"]:checked');
+        if (checkedCurrency) {
+            checkedCurrency.closest('.currency-option').classList.add('active');
+        }
+    });
+</script>
+{% endblock %}

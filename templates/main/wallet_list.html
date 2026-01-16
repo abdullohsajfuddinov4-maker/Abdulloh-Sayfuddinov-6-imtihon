@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои кошельки{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    .page-header h1 {
+        color: #333;
+    }
+
+    .wallet-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+
+    .wallet-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .wallet-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .wallet-card.cash::before {
+        background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .wallet-card.uzcard::before {
+        background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .wallet-card.visa::before {
+        background: linear-gradient(90deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .wallet-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+    }
+
+    .wallet-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .wallet-type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 14px;
+        background: #f0f0f0;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #666;
+    }
+
+    .wallet-type-badge.cash {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .wallet-type-badge.uzcard {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .wallet-type-badge.visa {
+        background: #fce4ec;
+        color: #c2185b;
+    }
+
+    .wallet-name {
+        font-size: 22px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .wallet-balance {
+        font-size: 36px;
+        font-weight: bold;
+        color: #4CAF50;
+        margin-bottom: 10px;
+    }
+
+    .wallet-currency {
+        font-size: 16px;
+        color: #999;
+        margin-bottom: 20px;
+    }
+
+    .wallet-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .wallet-btn {
+        flex: 1;
+        padding: 10px;
+        text-align: center;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .wallet-btn-view {
+        background: #4CAF50;
+        color: #fff;
+    }
+
+    .wallet-btn-view:hover {
+        background: #45a049;
+    }
+
+    .wallet-btn-delete {
+        background: #f5f5f5;
+        color: #f44336;
+        border: none;
+        cursor: pointer;
+    }
+
+    .wallet-btn-delete:hover {
+        background: #ffebee;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .empty-state-icon {
+        font-size: 96px;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h2 {
+        color: #333;
+        margin-bottom: 15px;
+    }
+
+    .empty-state p {
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 16px;
+    }
+
+    .total-summary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        padding: 30px;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .total-summary h3 {
+        font-size: 16px;
+        opacity: 0.9;
+        margin-bottom: 10px;
+    }
+
+    .total-summary .amounts {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+    }
+
+    .total-summary .amount-item {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    .total-summary .amount {
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .total-summary .currency {
+        font-size: 14px;
+        opacity: 0.8;
+    }
+
+    @media (max-width: 768px) {
+        .wallet-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+
+        .total-summary .amounts {
+            flex-direction: column;
+            gap: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>👛 Мои кошельки</h1>
+    <a href="{% url 'wallet_add' %}" class="btn">+ Добавить кошелёк</a>
+</div>
+
+{% if wallets %}
+    <div class="total-summary">
+        <h3>💼 Общий баланс</h3>
+        <div class="amounts">
+            {% load mathfilters %}
+            <div class="amount-item">
+                <div class="amount">
+                    {% widthratio wallets.0.balance 1 0 as uzs_total %}
+                    {% for wallet in wallets %}
+                        {% if wallet.currency == 'UZS' %}
+                            {% widthratio uzs_total|add:wallet.balance 1 1 as uzs_total %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ uzs_total|default:0|floatformat:0 }} сум
+                </div>
+                <div class="currency">Узбекский сум</div>
+            </div>
+            
+            <div class="amount-item">
+                <div class="amount">
+                    {% widthratio wallets.0.balance 1 0 as usd_total %}
+                    {% for wallet in wallets %}
+                        {% if wallet.currency == 'USD' %}
+                            {% widthratio usd_total|add:wallet.balance 1 1 as usd_total %}
+                        {% endif %}
+                    {% endfor %}
+                    {{ usd_total|default:0|floatformat:2 }} $
+                </div>
+                <div class="currency">Доллар США</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="wallet-grid">
+        {% for wallet in wallets %}
+            <div class="wallet-card {{ wallet.type }}">
+                <div class="wallet-header">
+                    <span class="wallet-type-badge {{ wallet.type }}">
+                        {% if wallet.type == 'cash' %}
+                            💵 Наличные
+                        {% elif wallet.type == 'uzcard' %}
+                            💳 UzCard
+                        {% elif wallet.type == 'visa' %}
+                            💎 Visa
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="wallet-name">{{ wallet.name }}</div>
+                
+                <div class="wallet-balance">
+                    {{ wallet.balance|floatformat:0 }}
+                </div>
+                
+                <div class="wallet-currency">
+                    {% if wallet.currency == 'UZS' %}
+                        Узбекский сум
+                    {% else %}
+                        Доллар США
+                    {% endif %}
+                </div>
+                
+                <div class="wallet-actions">
+                    <a href="{% url 'wallet_detail' wallet.pk %}" class="wallet-btn wallet-btn-view">
+                        👁️ Смотреть
+                    </a>
+                    <form method="post" action="{% url 'wallet_delete' wallet.pk %}" style="flex: 1;" onsubmit="return confirm('Удалить кошелёк {{ wallet.name }}?');">
+                        {% csrf_token %}
+                        <button type="submit" class="wallet-btn wallet-btn-delete" style="width: 100%;">
+                            🗑️ Удалить
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">👛</div>
+        <h2>У вас пока нет кошельков</h2>
+        <p>Создайте свой первый кошелёк, чтобы начать управлять финансами</p>
+        <a href="{% url 'wallet_add' %}" class="btn">+ Создать первый кошелёк</a>
+    </div>
+{% endif %}
+{% endblock %}
