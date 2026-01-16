@@ -105,17 +105,26 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+
+import os
+from django.utils.translation import gettext_lazy as _
+
 LANGUAGES = [
-    ('ru', 'Русский'),
-    ('en', 'English'),
-    ('uz', 'O‘zbek'),
+    ('ru', _('Russian')),
+    ('uz', _('Uzbek')),
+    ('en', _('English')),
+]
+
+LANGUAGE_CODE = 'ru'
+
+USE_I18N = True
+USE_L10N = True
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale/'),
 ]
 TIME_ZONE = 'UTC'
 
-USE_I18N = True
-
-USE_TZ = True
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'

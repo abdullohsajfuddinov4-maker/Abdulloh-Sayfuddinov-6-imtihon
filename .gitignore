@@ -1,0 +1,51 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Django-специфичные файлы
+db.sqlite3
+*.sqlite3
+
+# Virtual environment
+venv/
+.venv/
+
+# IDE и редактор кода
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Логи и временные файлы
+*.log
+*.pot
+*.pyc
+*~
+
+# Медиафайлы (если не хотите хранить в репозитории)
+media/
+
+# Конфигурационные файлы (если локальные)
+config/
+.env
+
+# Отчёты и артефакты тестов
+htmlcov/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+
+# Компиляции и сборки
+*.swp
+*.swo
+
+# Другие общие исключения
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
