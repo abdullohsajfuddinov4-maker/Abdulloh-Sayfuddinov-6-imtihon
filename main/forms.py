@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+
 from .models import Category, Wallet, Transaction
 from django import forms
 from django.db import transaction as db_transaction
@@ -100,6 +102,7 @@ class WalletForm(forms.ModelForm):
         return cleaned_data
 
 
+
 class TopUpForm(forms.ModelForm):
 
     OPERATION_TYPES = [
@@ -112,7 +115,10 @@ class TopUpForm(forms.ModelForm):
         max_length=100,
         required=False,
         label='Название новой категории',
-        widget=forms.TextInput(attrs={'placeholder': 'Новая категория...', 'class': 'form-control'})
+        widget=forms.TextInput(attrs={
+            'placeholder': 'Новая категория...',
+            'class': 'form-control'
+        })
     )
 
     class Meta:
@@ -122,9 +128,8 @@ class TopUpForm(forms.ModelForm):
     def __init__(self, *args, user=None, wallet=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = user
+
         self.fields['wallet'].queryset = Wallet.objects.filter(user=user)
-
-
         self.fields['category'].queryset = Category.objects.filter(user=user)
         self.fields['category'].required = False
 
@@ -132,11 +137,33 @@ class TopUpForm(forms.ModelForm):
             self.fields['wallet'].initial = wallet
             self.fields['wallet'].disabled = True
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        amount = cleaned_data.get('amount')
+        op_type = cleaned_data.get('type')
+
+        wallet = (
+            self.fields['wallet'].initial
+            if self.fields['wallet'].disabled
+            else cleaned_data.get('wallet')
+        )
+
+        if not wallet or not amount or not op_type:
+            return cleaned_data
+
+
+        if op_type == 'outcome' and wallet.balance < amount:
+            raise ValidationError(
+                f'Недостаточно средств. Баланс: {wallet.balance} {wallet.currency}'
+            )
+
+        return cleaned_data
+
     def save(self, commit=True):
         with db_transaction.atomic():
             obj = super().save(commit=False)
             obj.user = self.user
-
 
             op_type = self.cleaned_data.get('type')
             obj.type = op_type
@@ -149,12 +176,11 @@ class TopUpForm(forms.ModelForm):
                 category, created = Category.objects.get_or_create(
                     user=self.user,
                     name=new_category_name,
-                    type=op_type  # Создаем категорию правильного типа
+                    type=op_type
                 )
                 obj.category = category
 
             obj.save()
-
 
             wallet = obj.wallet
             if op_type == 'income':
