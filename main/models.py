@@ -27,7 +27,7 @@ class Category(models.Model):
 class Wallet(models.Model):
     TYPE_CHOICES = (
         ("cash", _("Наличные")),
-        ("uzcard", _("UzCard")),
+        ("uzcard", _("bank cart")),
         ("visa", _("Visa")),
     )
 

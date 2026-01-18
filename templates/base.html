@@ -205,6 +205,74 @@
                 text-align: center;
             }
         }
+        /* Основное меню */
+.main-menu {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    font-family: Arial, sans-serif;
+}
+
+/* Элементы меню */
+.main-menu > li {
+    position: relative;
+}
+
+/* Ссылки */
+.main-menu a {
+    text-decoration: none;
+    color: #333;
+    padding: 6px 12px;
+    display: block;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.main-menu a:hover {
+    background: #f0f0f0;
+}
+
+/* Выпадающий список */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 200px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+/* Появление при наведении */
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+/* Элементы выпадающего списка */
+.dropdown-menu li a {
+    padding: 6px 12px;
+    color: #333;
+}
+
+.dropdown-menu li a:hover {
+    background: #f0f0f0;
+}
+
+/* Нет кошельков */
+.no-wallets {
+    color: #999;
+    font-style: italic;
+    padding: 6px 12px;
+    display: block;
+}
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -212,16 +280,33 @@
     <nav>
         <div class="container">
             <div class="logo">💰 MyFinance</div>
-            <ul>
-                <li><a href="{% url 'dashboard' %}">Главная</a></li>
-                <li><a href="{% url 'wallet_list' %}">Кошельки</a></li>
-                <li><a href="{% url 'manage_money' %}">Управление</a></li>
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'profile' %}">👤 {{ user.username }}</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}">Войти</a></li>
-                {% endif %}
-            </ul>
+            <ul class="main-menu">
+    <li><a href="{% url 'dashboard' %}">Главная</a></li>
+    <li><a href="{% url 'wallet_list' %}">Кошельки</a></li>
+
+    {% if wallets %}
+    <li class="dropdown">
+        <a href="#">Управление ▾</a>
+        <ul class="dropdown-menu">
+            {% for wallet in wallets %}
+            <li>
+                <a href="{% url 'transaction_create' wallet.pk %}">
+                    {{ wallet.name }} ({{ wallet.balance|floatformat:0 }} {{ wallet.currency }})
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% else %}
+    <li><span class="no-wallets">Нет кошельков</span></li>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <li><a href="{% url 'profile' %}">👤 {{ user.username }}</a></li>
+    {% else %}
+        <li><a href="{% url 'login' %}">Войти</a></li>
+    {% endif %}
+</ul>
         </div>
     </nav>
 

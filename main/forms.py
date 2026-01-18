@@ -102,91 +102,104 @@ class WalletForm(forms.ModelForm):
         return cleaned_data
 
 
-
-class TopUpForm(forms.ModelForm):
-
-    OPERATION_TYPES = [
-        ('income', 'Доход (Пополнение)'),
-        ('outcome', 'Расход (Списание)'),
-    ]
-    type = forms.ChoiceField(choices=[('income', 'Доход'), ('outcome', 'Расход')])
-
-    new_category_name = forms.CharField(
-        max_length=100,
-        required=False,
-        label='Название новой категории',
-        widget=forms.TextInput(attrs={
-            'placeholder': 'Новая категория...',
-            'class': 'form-control'
-        })
-    )
-
+class TransactionsCreateForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        fields = ['wallet', 'category', 'amount', 'description']
+        fields = ('category','type','amount','description')
 
-    def __init__(self, *args, user=None, wallet=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.user = user
-
-        self.fields['wallet'].queryset = Wallet.objects.filter(user=user)
-        self.fields['category'].queryset = Category.objects.filter(user=user)
-        self.fields['category'].required = False
-
-        if wallet:
-            self.fields['wallet'].initial = wallet
-            self.fields['wallet'].disabled = True
-
-    def clean(self):
-        cleaned_data = super().clean()
-
-        amount = cleaned_data.get('amount')
-        op_type = cleaned_data.get('type')
-
-        wallet = (
-            self.fields['wallet'].initial
-            if self.fields['wallet'].disabled
-            else cleaned_data.get('wallet')
-        )
-
-        if not wallet or not amount or not op_type:
-            return cleaned_data
+    def __init__(self,*args,user=None,**kwargs):
+        super().__init__(*args,**kwargs)
+        if user is not None:
+            self.fields['category'].queryset = Category.objects.filter(user=user)
 
 
-        if op_type == 'outcome' and wallet.balance < amount:
-            raise ValidationError(
-                f'Недостаточно средств. Баланс: {wallet.balance} {wallet.currency}'
-            )
 
-        return cleaned_data
 
-    def save(self, commit=True):
-        with db_transaction.atomic():
-            obj = super().save(commit=False)
-            obj.user = self.user
 
-            op_type = self.cleaned_data.get('type')
-            obj.type = op_type
-
-            if self.fields['wallet'].disabled:
-                obj.wallet = self.fields['wallet'].initial
-
-            new_category_name = self.cleaned_data.get('new_category_name')
-            if new_category_name:
-                category, created = Category.objects.get_or_create(
-                    user=self.user,
-                    name=new_category_name,
-                    type=op_type
-                )
-                obj.category = category
-
-            obj.save()
-
-            wallet = obj.wallet
-            if op_type == 'income':
-                wallet.balance += obj.amount
-            else:
-                wallet.balance -= obj.amount
-            wallet.save()
-
-        return obj
+# class TopUpForm(forms.ModelForm):
+#
+#     OPERATION_TYPES = [
+#         ('income', 'Доход (Пополнение)'),
+#         ('outcome', 'Расход (Списание)'),
+#     ]
+#     type = forms.ChoiceField(choices=[('income', 'Доход'), ('outcome', 'Расход')])
+#
+#     new_category_name = forms.CharField(
+#         max_length=100,
+#         required=False,
+#         label='Название новой категории',
+#         widget=forms.TextInput(attrs={
+#             'placeholder': 'Новая категория...',
+#             'class': 'form-control'
+#         })
+#     )
+#
+#     class Meta:
+#         model = Transaction
+#         fields = ['wallet', 'category', 'amount', 'description']
+#
+#     def __init__(self, *args, user=None, wallet=None, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.user = user
+#
+#         self.fields['wallet'].queryset = Wallet.objects.filter(user=user)
+#         self.fields['category'].queryset = Category.objects.filter(user=user)
+#         self.fields['category'].required = False
+#
+#         if wallet:
+#             self.fields['wallet'].initial = wallet
+#             self.fields['wallet'].disabled = True
+#
+#     def clean(self):
+#         cleaned_data = super().clean()
+#
+#         amount = cleaned_data.get('amount')
+#         op_type = cleaned_data.get('type')
+#
+#         wallet = (
+#             self.fields['wallet'].initial
+#             if self.fields['wallet'].disabled
+#             else cleaned_data.get('wallet')
+#         )
+#
+#         if not wallet or not amount or not op_type:
+#             return cleaned_data
+#
+#
+#         if op_type == 'outcome' and wallet.balance < amount:
+#             raise ValidationError(
+#                 f'Недостаточно средств. Баланс: {wallet.balance} {wallet.currency}'
+#             )
+#
+#         return cleaned_data
+#
+#     def save(self, commit=True):
+#         with db_transaction.atomic():
+#             obj = super().save(commit=False)
+#             obj.user = self.user
+#
+#             op_type = self.cleaned_data.get('type')
+#             obj.type = op_type
+#
+#             if self.fields['wallet'].disabled:
+#                 obj.wallet = self.fields['wallet'].initial
+#
+#             new_category_name = self.cleaned_data.get('new_category_name')
+#             if new_category_name:
+#                 category, created = Category.objects.get_or_create(
+#                     user=self.user,
+#                     name=new_category_name,
+#                     type=op_type
+#                 )
+#                 obj.category = category
+#
+#             obj.save()
+#
+#             wallet = obj.wallet
+#             if op_type == 'income':
+#                 wallet.balance += obj.amount
+#             else:
+#                 wallet.balance -= obj.amount
+#             wallet.save()
+#
+#         return obj

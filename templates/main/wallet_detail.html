@@ -279,7 +279,7 @@
 
 <!-- Быстрые действия -->
 <div class="action-buttons">
-    <a href="{% url 'wallet_manage' wallet.pk %}" class="btn">
+    <a href="{% url 'transaction_create' wallet.pk %}" class="btn">
         💸 Пополнить / Снять
     </a>
 </div>
@@ -291,31 +291,21 @@
         <div class="stat-value">{{ transactions|length }}</div>
     </div>
     
-    <div class="stat-box">
-        <div class="stat-label">📈 Доходов</div>
-        <div class="stat-value positive">
-            {% widthratio transactions.0.amount 1 0 as income_total %}
-            {% for t in transactions %}
-                {% if t.type == 'income' %}
-                    {% widthratio income_total|add:t.amount 1 1 as income_total %}
-                {% endif %}
-            {% endfor %}
-            +{{ income_total|default:0|floatformat:0 }}
-        </div>
+   <div class="stat-box">
+    <div class="stat-label">📈 Доходов</div>
+    <div class="stat-value positive">
+        +{{ income|floatformat:0 }}
     </div>
+</div>
+
     
     <div class="stat-box">
-        <div class="stat-label">📉 Расходов</div>
-        <div class="stat-value negative">
-            {% widthratio transactions.0.amount 1 0 as outcome_total %}
-            {% for t in transactions %}
-                {% if t.type == 'outcome' %}
-                    {% widthratio outcome_total|add:t.amount 1 1 as outcome_total %}
-                {% endif %}
-            {% endfor %}
-            -{{ outcome_total|default:0|floatformat:0 }}
-        </div>
+    <div class="stat-label">📉 Расходов</div>
+    <div class="stat-value negative">
+        -{{ outcome|floatformat:0 }}
     </div>
+</div>
+
 </div>
 
 <!-- Транзакции -->

@@ -1,11 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.base import tag_re
+from django.template.context_processors import request
 from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum, Q
 from django.urls import reverse_lazy
 from datetime import datetime, timedelta
 from .models import Transaction, Wallet, Category
-from .forms import ManageMoneyForm, WalletForm, TopUpForm
+from .forms import ManageMoneyForm, WalletForm, TransactionsCreateForm
+from django.views import View
 from django.contrib import messages
 
 
@@ -26,7 +29,7 @@ class DashboardView(TemplateView):
             created_at__gte=date_from
         )
 
-
+        wallets = Wallet.objects.filter(user=self.request.user)
         context['total_income'] = transactions.filter(
             type='income'
         ).aggregate(Sum('amount'))['amount__sum'] or 0
@@ -34,9 +37,8 @@ class DashboardView(TemplateView):
         context['total_outcome'] = transactions.filter(
             type='outcome'
         ).aggregate(Sum('amount'))['amount__sum'] or 0
-
-        context['wallets'] = user.wallets.all()
-
+        context['wallets'] = wallets
+        context['first_wallet'] = wallets.first()
         total_uzs = 0
         total_usd = 0
         for wallet in context['wallets']:
@@ -82,6 +84,55 @@ class DashboardView(TemplateView):
         return periods.get(period, 'День')
 
 
+########################----- transactions------
+
+
+class CreateTransactionsView(View):
+    def get(self,request,pk):
+        wallet = get_object_or_404(Wallet,pk=pk,user=request.user)
+        form = TransactionsCreateForm(user=request.user)
+        return render(request,'main/transactions_create.html',{'form':form,'wallet':wallet})
+
+    def post(self,request,pk):
+        wallet = get_object_or_404(Wallet,pk=pk,user=request.user)
+        form = TransactionsCreateForm(request.POST,user=request.user)
+        if form.is_valid():
+
+            category_choice = request.POST.get('category_choice')
+            if category_choice == 'new':
+                name = request.POST.get('new_category_name', '').strip()
+                if not name:
+                    form.add_error('category', 'Название новой категории обязательно!')
+                    return render(request, 'main/transactions_create.html', {'form': form, 'wallet': wallet})
+                category = Category.objects.create(user=request.user, name=name, type=form.cleaned_data['type'])
+            else:
+                category = form.cleaned_data['category']
+
+            transaction = form.save(commit=False)
+            transaction.user = request.user
+            transaction.wallet = wallet
+            transaction.category = category
+
+            if transaction.type == 'income':
+                wallet.balance += transaction.amount
+            elif transaction.type == 'outcome':
+                if wallet.balance < transaction.amount:
+                    form.add_error('amount', 'Сумма больше текущего баланса!')
+                    return render(request, 'main/transactions_create.html', {'form': form, 'wallet': wallet})
+                wallet.balance -= transaction.amount
+
+            wallet.save()
+            transaction.save()
+            return redirect('dashboard')
+        return render(request,'main/transactions_create.html',{'form':form,'wallet':wallet})
+
+
+
+
+
+
+
+
 class TransactionListView(LoginRequiredMixin, ListView):
 
     model = Transaction
@@ -105,85 +156,15 @@ class TransactionListView(LoginRequiredMixin, ListView):
         context['transaction_type'] = transaction_type
         context['type_display'] = 'Доходы' if transaction_type == 'income' else 'Расходы'
 
+        wallet = Wallet.objects.filter(user=self.request.user)
+        context['wallet'] = wallet
+        context['first_wallet'] = wallet.first()
+ 
 
         total = self.get_queryset().aggregate(Sum('amount'))['amount__sum'] or 0
         context['total'] = total
 
         return context
-
-
-class TransactionCreateView(LoginRequiredMixin, CreateView):
-
-    model = Transaction
-    template_name = 'main/transaction_form.html'
-    fields = ['wallet', 'category', 'type', 'amount', 'description']
-    success_url = reverse_lazy('dashboard')
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-
-        form.fields['wallet'].queryset = Wallet.objects.filter(user=self.request.user)
-        return form
-
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        transaction = form.save()
-
-
-        wallet = transaction.wallet
-        if transaction.type == 'income':
-            wallet.balance += transaction.amount
-            messages.success(self.request, f'Доход {transaction.amount} добавлен')
-        else:
-            wallet.balance -= transaction.amount
-            messages.success(self.request, f'Расход {transaction.amount} добавлен')
-
-        wallet.save()
-
-        return redirect(self.success_url)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['transaction_type'] = self.request.GET.get('type', 'outcome')
-        return context
-
-
-class TransactionUpdateView(LoginRequiredMixin, UpdateView):
-
-    model = Transaction
-    template_name = 'main/transaction_form.html'
-    fields = ['wallet', 'category', 'type', 'amount', 'description']
-    success_url = reverse_lazy('dashboard')
-
-    def get_queryset(self):
-        return Transaction.objects.filter(user=self.request.user)
-
-    def form_valid(self, form):
-        old_transaction = Transaction.objects.get(pk=self.object.pk)
-        old_wallet = old_transaction.wallet
-        old_amount = old_transaction.amount
-        old_type = old_transaction.type
-
-
-        if old_type == 'income':
-            old_wallet.balance -= old_amount
-        else:
-            old_wallet.balance += old_amount
-        old_wallet.save()
-
-
-        transaction = form.save()
-
-        new_wallet = transaction.wallet
-        if transaction.type == 'income':
-            new_wallet.balance += transaction.amount
-        else:
-            new_wallet.balance -= transaction.amount
-        new_wallet.save()
-
-        messages.success(self.request, 'Транзакция обновлена')
-        return redirect(self.success_url)
 
 
 class TransactionDeleteView(LoginRequiredMixin, DeleteView):
@@ -208,7 +189,9 @@ class TransactionDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-from django.db.models import Sum
+
+
+####################### ---------- Wallet-------------------
 
 
 class WalletListView(LoginRequiredMixin, ListView):
@@ -263,20 +246,57 @@ class WalletCreateView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class WalletDetailView(LoginRequiredMixin, TemplateView):
-
+# -----------------------------------------
+class WalletDetailView(LoginRequiredMixin,TemplateView):
     template_name = 'main/wallet_detail.html'
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        wallet_id = self.kwargs.get('pk')
-        wallet = get_object_or_404(Wallet, pk=wallet_id, user=self.request.user)
-
+        pk = self.kwargs.get('pk')
+        wallet = get_object_or_404(Wallet,pk=pk,user=self.request.user)
         context['wallet'] = wallet
-        context['transactions'] = wallet.transactions.select_related('category').order_by('-created_at')[:20]
+        transactions = wallet.transactions.all()
 
+        context['income'] = transactions.filter(type='income').aggregate(total = Sum('amount'))['total'] or 0
+        context['outcome'] = transactions.filter(type= 'outcome').aggregate(total =Sum('amount'))['total'] or 0
+
+        context['transactions'] = wallet.transactions.select_related('category').order_by('-created_at')[:20]
         return context
 
+
+# class WalletDetailView(LoginRequiredMixin,TemplateView):
+#     template_name = 'main/wallet_detail.html'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         pk = self.kwargs.get('pk')
+#
+#         wallet = get_object_or_404(Wallet,pk=pk,user = self.request.user)
+#         transactions = wallet.transactions.all()
+#         context['wallet'] = wallet
+#
+#         context['income'] = transactions.filter(type='income').aggregate(total = Sum('amount'))['total'] or 0
+#         context['outcome'] = transactions.filter(type= 'outcome').aggregate(total=Sum('amount'))['total'] or 0
+#
+#         context['transactions'] = wallet.transactions.select_related('category').order_by('-created_at')[:20]
+#         return context
+# class WalletDetailView(LoginRequiredMixin, TemplateView):
+#
+#     template_name = 'main/wallet_detail.html'
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         pk= self.kwargs.get('pk')
+#         wallet = get_object_or_404(Wallet, pk=pk, user=self.request.user)
+#         transactions = wallet.transactions.all()
+#         context['wallet'] = wallet
+#
+#         context['income'] = transactions.filter(type='income').aggregate(total=Sum('amount'))['total'] or 0
+#         context['outcome'] = transactions.filter(type='outcome').aggregate(total = Sum('amount'))['total'] or 0
+#
+#         context['transactions'] = wallet.transactions.select_related('category').order_by('-created_at')[:20]
+#
+#         return context
+#---------------------------------------
 
 class WalletDeleteView(LoginRequiredMixin, DeleteView):
 
@@ -297,45 +317,3 @@ class WalletDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-class TopUpView(LoginRequiredMixin, CreateView):
-    template_name = 'main/topup_form.html'
-    form_class = TopUpForm
-    success_url = reverse_lazy('dashboard')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['hide_type'] = True
-        return context
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        wallet = None
-        if 'wallet_id' in self.kwargs:
-            wallet = get_object_or_404(
-                Wallet,
-                id=self.kwargs['wallet_id'],
-                user=self.request.user
-            )
-        kwargs.update({
-            'user': self.request.user,
-            'wallet': wallet,
-        })
-        return kwargs
-
-    def form_valid(self, form):
-        transaction = form.save()
-        if transaction.type == 'income':
-            messages.success(
-                self.request,
-                f'✅ Кошелёк "{transaction.wallet.name}" пополнен на {transaction.amount} {transaction.wallet.currency}'
-            )
-        else:
-            messages.success(
-                self.request,
-                f'💸 С кошелька "{transaction.wallet.name}" снято {transaction.amount} {transaction.wallet.currency}'
-            )
-
-        if 'wallet_id' in self.kwargs:
-            return redirect('wallet_detail', pk=transaction.wallet.pk)
-
-        return redirect(self.success_url)
