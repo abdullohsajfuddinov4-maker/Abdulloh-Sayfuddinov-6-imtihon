@@ -239,29 +239,46 @@
 
 {% if wallets %}
     <div class="total-summary">
-        <h3>💼 Мои финансы</h3>
-        <div class="amounts" style="display: flex; gap: 20px; flex-wrap: wrap;">
+    <h3>💼 Мои финансы</h3>
 
-            <div class="amount-item" style="flex: 1; min-width: 200px;">
-                <div class="amount">
-                    {{ total_non_visa_balance|floatformat:0 }} сум
-                </div>
-                <div class="currency">Местный баланс (UzCard/Наличные)</div>
+    <div class="amounts" style="display: flex; gap: 20px; flex-wrap: wrap;">
+
+        <!-- Местный баланс -->
+        <div class="amount-item" style="flex: 1; min-width: 200px;">
+            <div class="amount">
+                {{ total_non_visa_balance|default:0|floatformat:0 }} сум
             </div>
+            <div class="currency">
+                Местный баланс (UzCard / Наличные)
+            </div>
+        </div>
 
-            <div class="amount-item" style="flex: 1; min-width: 200px; border-left: 2px solid rgba(255,255,255,0.2); padding-left: 20px;">
-    <div class="amount" style="color: white; font-weight: bold;">
-        {{ total_visa_balance|floatformat:2 }} $
-    </div>
-    <div class="currency" style="color: rgba(255,255,255,0.8); font-size: 14px;">
-        Валютный счет (Visa)
+        <!-- Валютный баланс -->
+        <div class="amount-item"
+             style="flex: 1; min-width: 200px; border-left: 2px solid rgba(255,255,255,0.2); padding-left: 20px;">
+            <div class="amount" style="color: white; font-weight: bold;">
+                {{ total_visa_balance|default:0|floatformat:2 }} $
+            </div>
+            <div class="currency" style="color: rgba(255,255,255,0.8); font-size: 14px;">
+                Валютный счет (Visa)
+            </div>
+        </div>
+
+        <!-- Общий баланс -->
+        <div class="amount-item"
+             style="flex: 1; min-width: 200px; border-left: 2px solid rgba(255,255,255,0.2); padding-left: 20px;">
+            <div class="amount" style="font-weight: bold;">
+                {{ total_all_balance|default:0|floatformat:0 }} сум
+            </div>
+            <div class="currency">
+                Общий баланс (с учетом Visa)
+            </div>
+        </div>
+
     </div>
 </div>
 
-        </div>
-    </div>
-
-    <div class="wallet-grid">
+        <div class="wallet-grid">
         {% for wallet in wallets %}
             <div class="wallet-card {{ wallet.type }} {% if wallet.type == 'visa' %}visa-card{% endif %}">
                 <div class="wallet-header">

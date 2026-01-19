@@ -1,13 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.template.base import tag_re
-from django.template.context_processors import request
-from django.views.generic import TemplateView, ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import TemplateView, ListView, CreateView,  DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Sum, Q
+from django.db.models import Sum
 from django.urls import reverse_lazy
 from datetime import datetime, timedelta
 from .models import Transaction, Wallet, Category
-from .forms import ManageMoneyForm, WalletForm, TransactionsCreateForm
+from .forms import  TransactionsCreateForm ,TransferForm
 from django.views import View
 from django.contrib import messages
 
@@ -30,25 +28,51 @@ class DashboardView(TemplateView):
         )
 
         wallets = Wallet.objects.filter(user=self.request.user)
-        context['total_income'] = transactions.filter(
-            type='income'
-        ).aggregate(Sum('amount'))['amount__sum'] or 0
+        RATE_USD = 12000
 
-        context['total_outcome'] = transactions.filter(
-            type='outcome'
-        ).aggregate(Sum('amount'))['amount__sum'] or 0
+        total_income = 0
+        total_outcome = 0
+
+        for tx in transactions.select_related('wallet'):
+            amount_uzs = tx.amount
+
+            if tx.wallet.currency == 'USD':
+                amount_uzs = tx.amount * RATE_USD
+
+            if tx.type == 'income':
+                total_income += amount_uzs
+            else:
+                total_outcome += amount_uzs
+
+        context['total_income'] = total_income
+        context['total_outcome'] = total_outcome
+
         context['wallets'] = wallets
         context['first_wallet'] = wallets.first()
         total_uzs = 0
         total_usd = 0
+        total_usd_not_uzs = 0
+        total_usd_not_usd = 0
         for wallet in context['wallets']:
             if wallet.currency == 'UZS':
                 total_uzs += wallet.balance
             else:
+                total_uzs += wallet.balance * 12000
+        for wallet in context['wallets']:
+            if wallet.currency == 'USD':
                 total_usd += wallet.balance
+            else:
+                total_usd += wallet.balance / 12000
+        for wallet in context['wallets']:
+            if wallet.currency == 'USD':
+                total_usd_not_uzs += wallet.balance
+            else:
+                total_usd_not_usd += wallet.balance
 
         context['total_balance_uzs'] = total_uzs
         context['total_balance_usd'] = total_usd
+        context['total_balance_usd_not_uzs'] = total_usd_not_uzs
+        context['total_balance_usd_not_usd'] = total_usd_not_usd
 
         context['period'] = period
         context['period_display'] = self.get_period_display(period)
@@ -84,10 +108,10 @@ class DashboardView(TemplateView):
         return periods.get(period, 'День')
 
 
-########################----- transactions------
+######################## transactions####################
 
 
-class CreateTransactionsView(View):
+class CreateTransactionsView(LoginRequiredMixin,View):
     def get(self,request,pk):
         wallet = get_object_or_404(Wallet,pk=pk,user=request.user)
         form = TransactionsCreateForm(user=request.user)
@@ -127,12 +151,6 @@ class CreateTransactionsView(View):
         return render(request,'main/transactions_create.html',{'form':form,'wallet':wallet})
 
 
-
-
-
-
-
-
 class TransactionListView(LoginRequiredMixin, ListView):
 
     model = Transaction
@@ -167,6 +185,9 @@ class TransactionListView(LoginRequiredMixin, ListView):
         return context
 
 
+# -----------------------------------------------
+
+
 class TransactionDeleteView(LoginRequiredMixin, DeleteView):
 
     model = Transaction
@@ -189,9 +210,7 @@ class TransactionDeleteView(LoginRequiredMixin, DeleteView):
         return super().delete(request, *args, **kwargs)
 
 
-
-
-####################### ---------- Wallet-------------------
+####################### Wallet####################
 
 
 class WalletListView(LoginRequiredMixin, ListView):
@@ -205,32 +224,18 @@ class WalletListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        total_non_visa = Wallet.objects.filter(
-            user=self.request.user
-        ).exclude(
-            type='visa'
-        ).aggregate(
-            total=Sum('balance')
-        )['total'] or 0
-
-        total_visa = Wallet.objects.filter(
-            user=self.request.user,
-            type='visa'
-        ).aggregate(
-            total=Sum('balance')
-        )['total'] or 0
-
-        total_all = Wallet.objects.filter(
-            user=self.request.user
-        ).aggregate(
-            total=Sum('balance')
-        )['total'] or 0
+        total_non_visa = Wallet.objects.filter(user=self.request.user).exclude(type='visa').aggregate(total = Sum('balance'))['total'] or 0
+        total_visa = Wallet.objects.filter(user=self.request.user, type='visa').aggregate(total = Sum('balance'))['total'] or 0
+        total_all = total_non_visa + total_visa*12000
 
         context['total_non_visa_balance'] = total_non_visa
         context['total_visa_balance'] = total_visa
         context['total_all_balance'] = total_all
 
         return context
+
+
+#---------------------------------------
 
 
 class WalletCreateView(LoginRequiredMixin, CreateView):
@@ -247,6 +252,8 @@ class WalletCreateView(LoginRequiredMixin, CreateView):
 
 
 # -----------------------------------------
+
+
 class WalletDetailView(LoginRequiredMixin,TemplateView):
     template_name = 'main/wallet_detail.html'
     def get_context_data(self, **kwargs):
@@ -263,40 +270,8 @@ class WalletDetailView(LoginRequiredMixin,TemplateView):
         return context
 
 
-# class WalletDetailView(LoginRequiredMixin,TemplateView):
-#     template_name = 'main/wallet_detail.html'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         pk = self.kwargs.get('pk')
-#
-#         wallet = get_object_or_404(Wallet,pk=pk,user = self.request.user)
-#         transactions = wallet.transactions.all()
-#         context['wallet'] = wallet
-#
-#         context['income'] = transactions.filter(type='income').aggregate(total = Sum('amount'))['total'] or 0
-#         context['outcome'] = transactions.filter(type= 'outcome').aggregate(total=Sum('amount'))['total'] or 0
-#
-#         context['transactions'] = wallet.transactions.select_related('category').order_by('-created_at')[:20]
-#         return context
-# class WalletDetailView(LoginRequiredMixin, TemplateView):
-#
-#     template_name = 'main/wallet_detail.html'
-#
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         pk= self.kwargs.get('pk')
-#         wallet = get_object_or_404(Wallet, pk=pk, user=self.request.user)
-#         transactions = wallet.transactions.all()
-#         context['wallet'] = wallet
-#
-#         context['income'] = transactions.filter(type='income').aggregate(total=Sum('amount'))['total'] or 0
-#         context['outcome'] = transactions.filter(type='outcome').aggregate(total = Sum('amount'))['total'] or 0
-#
-#         context['transactions'] = wallet.transactions.select_related('category').order_by('-created_at')[:20]
-#
-#         return context
 #---------------------------------------
+
 
 class WalletDeleteView(LoginRequiredMixin, DeleteView):
 
@@ -315,5 +290,44 @@ class WalletDeleteView(LoginRequiredMixin, DeleteView):
 
         messages.success(request, f'Кошелёк "{wallet.name}" удалён')
         return super().delete(request, *args, **kwargs)
+
+
+####################### transfer ##########################
+
+
+class TransferView(LoginRequiredMixin,View):
+    def get(self,request):
+        form = TransferForm(user=request.user)
+        return render(request,'main/transfer.html',{'form':form})
+
+    def post(self,request):
+        form = TransferForm(request.POST,user=request.user)
+        if not form.is_valid():
+            return render(request,'main/transfer.html',{'form':form})
+
+        from_wallet = form.cleaned_data['from_wallet']
+        to_wallet = form.cleaned_data['to_wallet']
+        amount  = form.cleaned_data['amount']
+
+        if from_wallet == to_wallet:
+            form.add_error(None, 'Нельзя переводить в тот же кошелёк')
+            return render(request,'main/transfer.html',{'form':form})
+
+        if from_wallet.balance < amount:
+            form.add_error('amount', 'Недостаточно средств')
+            return render(request, 'main/transfer_create.html', {'form': form})
+        from_wallet.balance -= amount
+        to_wallet.balance += amount
+
+        from_wallet.save()
+        to_wallet.save()
+        return redirect('dashboard')
+
+
+
+
+
+
+
 
 

@@ -27,7 +27,7 @@ class Category(models.Model):
 class Wallet(models.Model):
     TYPE_CHOICES = (
         ("cash", _("Наличные")),
-        ("uzcard", _("bank cart")),
+        ("uzcard", _("bank")),
         ("visa", _("Visa")),
     )
 
@@ -86,3 +86,18 @@ class Transaction(models.Model):
     class Meta:
         verbose_name = _("Транзакция")
         verbose_name_plural = _("Транзакции")
+    def __str__(self):
+        return f'{self.wallet}{self.user}'
+
+
+# -----------Transfer -------
+
+class Transfer(models.Model):
+    user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    from_wallet = models.ForeignKey(Wallet,on_delete=models.CASCADE,related_name='outgoing_transfers')
+    to_wallet = models.ForeignKey(Wallet,on_delete=models.CASCADE,related_name='incoming_transfers')
+    amount = models.DecimalField(max_digits=15,decimal_places=2)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return  f'{self.user}{self.from_wallet}{self.to_wallet}'

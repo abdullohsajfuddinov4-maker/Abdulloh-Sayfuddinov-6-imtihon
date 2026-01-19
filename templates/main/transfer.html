@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="transfer-container">
+    <h1>💸 Перевод между кошельками</h1>
+
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="errorlist">{{ form.non_field_errors }}</div>
+        {% endif %}
+
+        <!-- Откуда -->
+        <div class="form-group">
+            <label>Откуда *</label>
+            {{ form.from_wallet }}
+        </div>
+
+        <!-- Куда -->
+        <div class="form-group">
+            <label>Куда *</label>
+            {{ form.to_wallet }}
+        </div>
+
+        <!-- Сумма -->
+        <div class="form-group">
+            <label>Сумма *</label>
+            {{ form.amount }}
+            {% if form.amount.errors %}
+                <div class="errorlist">{{ form.amount.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Кнопка -->
+        <button type="submit" class="btn btn-main">Перевести</button>
+    </form>
+</div>
+
+<style>
+.transfer-container {
+    max-width: 500px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.form-group {
+    margin-bottom: 20px;
+}
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+input, select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+.btn-main {
+    padding: 10px 20px;
+    border: none;
+    background: #4CAF50;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.btn-main:hover {
+    background: #45a049;
+}
+.errorlist {
+    color: red;
+    font-size: 14px;
+    margin-top: 4px;
+}
+</style>
+{% endblock %}

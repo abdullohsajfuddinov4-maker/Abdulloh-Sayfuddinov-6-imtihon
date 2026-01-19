@@ -111,11 +111,35 @@
 
 <div class="total-balance">
     <h3>💼 Общий баланс</h3>
-    <div class="amount">{{ total_balance_uzs|floatformat:0 }} <small style="font-size: 20px;">сум</small></div>
-    {% if total_balance_usd > 0 %}
-        <div style="margin-top: 10px; font-size: 20px; opacity: 0.9;">{{ total_balance_usd|floatformat:2 }} $</div>
-    {% endif %}
+
+    <!-- Общий баланс в сумах -->
+    <div class="amount">
+        {{ total_balance_uzs|floatformat:0 }}
+        <small style="font-size: 18px;">сум</small>
+    </div>
+
+    <!-- Общий баланс в долларах -->
+    <div style="margin-top: 8px; font-size: 22px; opacity: 0.9;">
+        {{ total_balance_usd|floatformat:2 }}
+        <small>$</small>
+    </div>
+
+    <hr style="margin: 15px 0; opacity: 0.3;">
+
+    <!-- Фактические валюты -->
+    <div style="font-size: 18px;">
+        <div>
+            💵 Всего долларов:
+            <strong>{{ total_balance_usd_not_uzs|floatformat:2 }} $</strong>
+        </div>
+
+        <div style="margin-top: 5px;">
+            💰 Всего сум:
+            <strong>{{ total_balance_usd_not_usd|floatformat:0 }} сум</strong>
+        </div>
+    </div>
 </div>
+
 
 <div class="stats-grid">
     <div class="stat-card income">

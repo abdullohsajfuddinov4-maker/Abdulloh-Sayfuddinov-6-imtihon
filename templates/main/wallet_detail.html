@@ -246,7 +246,7 @@
 {% block content %}
 <div class="wallet-header {{ wallet.type }}">
     <a href="{% url 'wallet_list' %}" class="back-button">← Вернуться к кошелькам</a>
-    
+
     <div class="wallet-info">
         <div class="wallet-name-section">
             <span class="wallet-type-badge">
@@ -263,9 +263,11 @@
                 Создан: {{ wallet.created_at|date:"d F Y" }}
             </div>
         </div>
-        
+
         <div class="wallet-balance-section">
-            <div class="wallet-balance">{{ wallet.balance|floatformat:0 }}</div>
+            <div class="wallet-balance">
+                {{ wallet.balance|default:0|floatformat:0 }}
+            </div>
             <div class="wallet-currency">
                 {% if wallet.currency == 'UZS' %}
                     Узбекский сум
@@ -286,25 +288,27 @@
 
 <!-- Статистика -->
 <div class="stats-grid">
+
     <div class="stat-box">
         <div class="stat-label">📊 Всего транзакций</div>
-        <div class="stat-value">{{ transactions|length }}</div>
+        <div class="stat-value">
+            {{ transactions|length|default:0 }}
+        </div>
     </div>
-    
-   <div class="stat-box">
-    <div class="stat-label">📈 Доходов</div>
-    <div class="stat-value positive">
-        +{{ income|floatformat:0 }}
-    </div>
-</div>
 
-    
     <div class="stat-box">
-    <div class="stat-label">📉 Расходов</div>
-    <div class="stat-value negative">
-        -{{ outcome|floatformat:0 }}
+        <div class="stat-label">📈 Доходов</div>
+        <div class="stat-value positive">
+            +{{ income|default:0|floatformat:0 }}
+        </div>
     </div>
-</div>
+
+    <div class="stat-box">
+        <div class="stat-label">📉 Расходов</div>
+        <div class="stat-value negative">
+            -{{ outcome|default:0|floatformat:0 }}
+        </div>
+    </div>
 
 </div>
 
@@ -313,36 +317,44 @@
     <div class="section-header">
         <h2>🕒 История операций</h2>
     </div>
-    
-    {% if transactions %}
+
+    {% if transactions and transactions|length > 0 %}
         {% for transaction in transactions %}
             <div class="transaction-item">
+
                 <div class="transaction-icon">
-                    {% if transaction.category %}
-                        {{ transaction.category.icon|default:"💰" }}
+                    {% if transaction.category and transaction.category.icon %}
+                        {{ transaction.category.icon }}
                     {% else %}
                         💰
                     {% endif %}
                 </div>
-                
+
                 <div class="transaction-info">
                     <div class="transaction-category">
-                        {{ transaction.category.name|default:"Без категории" }}
+                        {% if transaction.category %}
+                            {{ transaction.category.name }}
+                        {% else %}
+                            Без категории
+                        {% endif %}
                     </div>
+
                     <div class="transaction-date">
                         {{ transaction.created_at|date:"d.m.Y H:i" }}
                     </div>
+
                     {% if transaction.description %}
                         <div class="transaction-description">
                             {{ transaction.description }}
                         </div>
                     {% endif %}
                 </div>
-                
+
                 <div class="transaction-amount {{ transaction.type }}">
                     {% if transaction.type == 'income' %}+{% else %}-{% endif %}
-                    {{ transaction.amount|floatformat:0 }}
+                    {{ transaction.amount|default:0|floatformat:0 }}
                 </div>
+
             </div>
         {% endfor %}
     {% else %}
