@@ -15,6 +15,9 @@ class TransactionsCreateForm(forms.ModelForm):
             self.fields['category'].queryset = Category.objects.filter(user=user)
 
 
+#--------------------------------------------------------------------
+
+
 class TransferForm(forms.ModelForm):
     class Meta:
         model = Transfer
@@ -25,5 +28,12 @@ class TransferForm(forms.ModelForm):
         if user:
             self.fields['from_wallet'].queryset = Wallet.objects.filter(user=user)
             self.fields['to_wallet'].queryset = Wallet.objects.filter(user=user)
+
+
+
+
+
+
+
 
 

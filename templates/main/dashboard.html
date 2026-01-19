@@ -105,20 +105,20 @@
 
 {% block content %}
 <div class="section-title">
-    <span>📊 Обзор финансов</span>
-    <span style="font-size: 14px; font-weight: normal; color: #888;">{{ "now"|date:"d F" }}</span>
+    <span data-i18n="overview">📊 Moliyaviy ko‘rinish</span>
+    <span style="font-size: 14px; font-weight: normal; color: #888;">
+        {{ "now"|date:"d F" }}
+    </span>
 </div>
 
 <div class="total-balance">
-    <h3>💼 Общий баланс</h3>
+    <h3 data-i18n="total_balance">💼 Umumiy balans</h3>
 
-    <!-- Общий баланс в сумах -->
     <div class="amount">
         {{ total_balance_uzs|floatformat:0 }}
         <small style="font-size: 18px;">сум</small>
     </div>
 
-    <!-- Общий баланс в долларах -->
     <div style="margin-top: 8px; font-size: 22px; opacity: 0.9;">
         {{ total_balance_usd|floatformat:2 }}
         <small>$</small>
@@ -126,53 +126,55 @@
 
     <hr style="margin: 15px 0; opacity: 0.3;">
 
-    <!-- Фактические валюты -->
     <div style="font-size: 18px;">
         <div>
-            💵 Всего долларов:
+            💵 <span data-i18n="total_usd">Jami dollar:</span>
             <strong>{{ total_balance_usd_not_uzs|floatformat:2 }} $</strong>
         </div>
 
         <div style="margin-top: 5px;">
-            💰 Всего сум:
+            💰 <span data-i18n="total_uzs">Jami so‘m:</span>
             <strong>{{ total_balance_usd_not_usd|floatformat:0 }} сум</strong>
         </div>
     </div>
 </div>
 
-
 <div class="stats-grid">
     <div class="stat-card income">
         <a href="{% url 'transaction_list' 'income' %}" style="text-decoration: none; color: inherit;">
-            <h3>📈 Доходы</h3>
+            <h3 data-i18n="income">📈 Daromadlar</h3>
             <div class="amount">+{{ total_income|floatformat:0 }}</div>
-            <div style="font-size: 12px; opacity: 0.8;">Всего за {{ period_display|lower }}</div>
+            <div style="font-size: 12px; opacity: 0.8;">
+                <span data-i18n="total_for_period">Jami:</span> {{ period_display|lower }}
+            </div>
         </a>
         <div class="period-selector">
-            <a href="?period=day" class="period-btn {% if period == 'day' %}active{% endif %}">День</a>
-            <a href="?period=week" class="period-btn {% if period == 'week' %}active{% endif %}">Нед.</a>
-            <a href="?period=month" class="period-btn {% if period == 'month' %}active{% endif %}">Мес.</a>
+            <a href="?period=day" class="period-btn {% if period == 'day' %}active{% endif %}" data-i18n="day">Kun</a>
+            <a href="?period=week" class="period-btn {% if period == 'week' %}active{% endif %}" data-i18n="week">Hafta</a>
+            <a href="?period=month" class="period-btn {% if period == 'month' %}active{% endif %}" data-i18n="month">Oy</a>
         </div>
     </div>
 
     <div class="stat-card outcome">
         <a href="{% url 'transaction_list' 'outcome' %}" style="text-decoration: none; color: inherit;">
-            <h3>📉 Расходы</h3>
+            <h3 data-i18n="outcome">📉 Xarajatlar</h3>
             <div class="amount">-{{ total_outcome|floatformat:0 }}</div>
-            <div style="font-size: 12px; opacity: 0.8;">Всего за {{ period_display|lower }}</div>
+            <div style="font-size: 12px; opacity: 0.8;">
+                <span data-i18n="total_for_period">Jami:</span> {{ period_display|lower }}
+            </div>
         </a>
         <div class="period-selector">
-            <a href="?period=day" class="period-btn {% if period == 'day' %}active{% endif %}">День</a>
-            <a href="?period=week" class="period-btn {% if period == 'week' %}active{% endif %}">Нед.</a>
-            <a href="?period=month" class="period-btn {% if period == 'month' %}active{% endif %}">Мес.</a>
+            <a href="?period=day" class="period-btn {% if period == 'day' %}active{% endif %}" data-i18n="day">Kun</a>
+            <a href="?period=week" class="period-btn {% if period == 'week' %}active{% endif %}" data-i18n="week">Hafta</a>
+            <a href="?period=month" class="period-btn {% if period == 'month' %}active{% endif %}" data-i18n="month">Oy</a>
         </div>
     </div>
 </div>
 
 <div class="wallets-section">
     <div class="section-title">
-        <span>👛 Мои кошельки</span>
-        <a href="{% url 'wallet_add' %}" style="font-size: 14px; color: #764ba2; text-decoration: none; font-weight: bold;">+ Добавить</a>
+        <span data-i18n="my_wallets">👛 Mening hamyonlarim</span>
+        <a href="{% url 'wallet_add' %}" style="font-size: 14px; color: #764ba2; text-decoration: none; font-weight: bold;" data-i18n="add_wallet">+ Qo‘shish</a>
     </div>
 
     <div class="wallet-grid">
@@ -180,7 +182,7 @@
             <a href="{% url 'wallet_detail' wallet.pk %}" style="text-decoration: none; color: inherit;">
                 <div class="wallet-card">
                     <span class="wallet-type">
-                        {% if wallet.type == 'cash' %}Наличные{% elif wallet.type == 'uzcard' %}UzCard{% else %}Visa{% endif %}
+                        {% if wallet.type == 'cash' %}Naqd{% elif wallet.type == 'uzcard' %}UzCard{% else %}Visa{% endif %}
                     </span>
                     <div class="wallet-name">
                         {% if wallet.type == 'cash' %}💵{% elif wallet.type == 'uzcard' %}💳{% else %}💎{% endif %}
@@ -193,13 +195,13 @@
                 </div>
             </a>
         {% empty %}
-            <p style="color: #999; grid-column: 1/-1;">Кошельков пока нет.</p>
+            <p style="color: #999; grid-column: 1/-1;" data-i18n="no_wallets">Hamyonlar mavjud emas.</p>
         {% endfor %}
     </div>
 </div>
 
 <div class="recent-transactions" style="margin-top: 35px;">
-    <div class="section-title">🕒 Последние операции</div>
+    <div class="section-title" data-i18n="recent_transactions">🕒 So‘nggi operatsiyalar</div>
 
     {% for transaction in recent_transactions %}
         <div class="transaction-item">
@@ -215,10 +217,64 @@
             </div>
         </div>
     {% empty %}
-        <div style="text-align: center; padding: 40px; color: #999; background: #fff; border-radius: 20px;">Операций пока нет</div>
+        <div style="text-align: center; padding: 40px; color: #999; background: #fff; border-radius: 20px;" data-i18n="no_transactions">
+            Operatsiyalar mavjud emas
+        </div>
     {% endfor %}
 </div>
 
+<script>
+const translations = {
+    uz: {
+        overview: "📊 Moliyaviy ko‘rinish",
+        total_balance: "💼 Umumiy balans",
+        total_usd: "Jami dollar:",
+        total_uzs: "Jami so‘m:",
+        income: "📈 Daromadlar",
+        outcome: "📉 Xarajatlar",
+        day: "Kun",
+        week: "Hafta",
+        month: "Oy",
+        total_for_period: "Jami:",
+        my_wallets: "👛 Mening hamyonlarim",
+        add_wallet: "+ Qo‘shish",
+        no_wallets: "Hamyonlar mavjud emas.",
+        recent_transactions: "🕒 So‘nggi operatsiyalar",
+        no_transactions: "Operatsiyalar mavjud emas"
+    },
+    en: {
+        overview: "📊 Financial Overview",
+        total_balance: "💼 Total Balance",
+        total_usd: "Total USD:",
+        total_uzs: "Total UZS:",
+        income: "📈 Income",
+        outcome: "📉 Expenses",
+        day: "Day",
+        week: "Week",
+        month: "Month",
+        total_for_period: "Total:",
+        my_wallets: "👛 My Wallets",
+        add_wallet: "+ Add",
+        no_wallets: "No wallets yet.",
+        recent_transactions: "🕒 Recent Transactions",
+        no_transactions: "No transactions yet."
+    }
+};
 
+let currentLang = 'uz'; // По умолчанию узбекский
+
+function translatePage(lang) {
+    currentLang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if(translations[lang][key]) {
+            el.innerText = translations[lang][key];
+        }
+    });
+}
+
+// Пример переключения языка
+// translatePage('en'); // для английского
+</script>
 
 {% endblock %}

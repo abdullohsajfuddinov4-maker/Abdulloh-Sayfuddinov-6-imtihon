@@ -5,206 +5,181 @@
 {% block extra_css %}
 <style>
 :root {
-    --income: #2ecc71;
-    --outcome: #e74c3c;
-    --gradient: linear-gradient(135deg, #667eea, #764ba2);
+    --income:#2ecc71;
+    --outcome:#e74c3c;
+    --gradient:linear-gradient(135deg,#667eea,#764ba2);
 }
 
-.form-container {
-    max-width: 600px;
-    margin: 40px auto;
-    background: #fff;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 15px 35px rgba(0,0,0,.1);
+.form-container{
+    max-width:600px;
+    margin:40px auto;
+    background:#fff;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 15px 35px rgba(0,0,0,.1);
 }
 
-.header {
-    background: var(--gradient);
-    color: #fff;
-    padding: 30px;
-    text-align: center;
-    position: relative;
+.header{
+    background:var(--gradient);
+    color:#fff;
+    padding:30px;
+    text-align:center;
+    position:relative;
 }
-.header h1 { margin: 0; font-size: 22px; }
+.back-link{
+    position:absolute;
+    left:20px;
+    top:30px;
+    color:#fff;
+    text-decoration:none;
+    opacity:.8;
+}
+.form-body{padding:30px}
 
-.back-link {
-    position: absolute;
-    left: 20px;
-    top: 32px;
-    color: rgba(255,255,255,.8);
-    text-decoration: none;
+.wallet-card{
+    background:linear-gradient(135deg,#1d2671,#c33764);
+    color:#fff;
+    padding:20px;
+    border-radius:16px;
+    margin-bottom:25px;
 }
+.wallet-name{font-size:14px;opacity:.9}
+.wallet-balance{font-size:30px;font-weight:800}
 
-.form-body { padding: 30px; }
+.form-group{margin-bottom:20px}
+label{font-weight:600;margin-bottom:6px;display:block}
 
-.form-group { margin-bottom: 20px; }
-label { font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; }
-
-.form-control {
-    width: 100%;
-    padding: 14px;
-    border-radius: 10px;
-    border: 2px solid #eee;
-    font-size: 16px;
-}
-.form-control:focus {
-    outline: none;
-    border-color: #764ba2;
-}
-
-/* Тип операции */
-.type-switch {
-    display: flex;
-    gap: 12px;
-}
-.type-btn {
-    flex: 1;
-    padding: 14px;
-    text-align: center;
-    border-radius: 12px;
-    border: 2px solid #eee;
-    cursor: pointer;
-    font-weight: 700;
-    transition: .3s;
-}
-.type-btn.income { color: var(--income); }
-.type-btn.outcome { color: var(--outcome); }
-
-.type-btn.active.income {
-    background: #eafaf1;
-    border-color: var(--income);
-}
-.type-btn.active.outcome {
-    background: #fdecec;
-    border-color: var(--outcome);
+.form-control{
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    border:2px solid #eee;
+    font-size:16px;
 }
 
-/* Сумма */
-.amount-wrap { position: relative; }
-.amount-wrap input {
-    font-size: 26px;
-    font-weight: 700;
-    padding-right: 70px;
+.type-switch{
+    display:flex;
+    gap:10px;
 }
-.currency {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: #667eea;
-    color: #fff;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-size: 13px;
+.type-btn{
+    flex:1;
+    padding:14px;
+    text-align:center;
+    border-radius:12px;
+    border:2px solid #eee;
+    font-weight:700;
+    cursor:pointer;
 }
+.type-btn.income{color:var(--income)}
+.type-btn.outcome{color:var(--outcome)}
+.type-btn.active.income{background:#eafaf1;border-color:var(--income)}
+.type-btn.active.outcome{background:#fdecec;border-color:var(--outcome)}
 
-/* Категории */
-.radio {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
+.amount-wrap{position:relative}
+.amount-wrap input{
+    font-size:26px;
+    font-weight:700;
+    padding-right:70px;
 }
-
-.hidden { display: none; }
-
-.btn-submit {
-    width: 100%;
-    padding: 16px;
-    border-radius: 12px;
-    border: none;
-    color: #fff;
-    font-size: 18px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: .3s;
-}
-.btn-income { background: var(--income); }
-.btn-outcome { background: var(--outcome); }
-
-.btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0,0,0,.15);
+.currency{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    background:#667eea;
+    color:#fff;
+    padding:6px 10px;
+    border-radius:8px;
 }
 
-.errorlist {
-    background: #fff5f5;
-    color: var(--outcome);
-    padding: 8px;
-    border-radius: 8px;
-    font-size: 13px;
-    margin-top: 6px;
+.quick-amounts{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+}
+.quick-amounts button{
+    flex:1;
+    padding:8px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+}
+
+.radio{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+}
+
+.hidden{display:none}
+
+.btn-submit{
+    width:100%;
+    padding:16px;
+    border-radius:12px;
+    border:none;
+    color:#fff;
+    font-size:18px;
+    font-weight:700;
+    cursor:pointer;
+}
+.btn-income{background:var(--income)}
+.btn-outcome{background:var(--outcome)}
+
+.errorlist{
+    background:#fff5f5;
+    color:var(--outcome);
+    padding:8px;
+    border-radius:8px;
+    margin-top:6px;
+    font-size:13px;
 }
 </style>
 {% endblock %}
 
-{{% block content %}
+{% block content %}
 <div class="form-container">
 
-    <!-- ШАПКА -->
     <div class="header">
         <a href="{% url 'wallet_detail' wallet.pk %}" class="back-link">← Назад</a>
         <h1 id="form-title">💰 Новая операция</h1>
     </div>
 
-    <form method="post" class="form-body" novalidate>
+    <form method="post" class="form-body">
         {% csrf_token %}
 
-        <!-- КАРТА КОШЕЛЬКА -->
+        <!-- КАРТА -->
         <div class="wallet-card">
-            <div class="wallet-icon">💳</div>
-            <div class="wallet-info">
-                <div class="wallet-name">{{ wallet.name }}</div>
-                <div class="wallet-balance">
-                    {{ wallet.balance }} {{ wallet.currency }}
-                </div>
+            <div class="wallet-name">{{ wallet.name }}</div>
+            <div class="wallet-balance">
+                {{ wallet.balance }} {{ wallet.currency }}
             </div>
         </div>
 
-        <!-- ТИП -->
+        <!-- TYPE -->
+        <input type="hidden" name="type" id="id_type" value="income">
+
         <div class="form-group">
             <label>Тип операции *</label>
             <div class="type-switch">
-                <div id="btn-income" class="type-btn income active" onclick="setType('income')">
-                    📥 Доход
-                </div>
-                <div id="btn-outcome" class="type-btn outcome" onclick="setType('outcome')">
-                    📤 Расход
-                </div>
+                <div id="btn-income" class="type-btn income active" onclick="setType('income')">📥 Доход</div>
+                <div id="btn-outcome" class="type-btn outcome" onclick="setType('outcome')">📤 Расход</div>
             </div>
-            <input type="hidden" name="type" id="id_type" value="income">
         </div>
-
-        <input type="hidden" name="wallet" value="{{ wallet.pk }}">
 
         <!-- СУММА -->
         <div class="form-group">
             <label>Сумма *</label>
-
             <div class="amount-wrap">
-                <input
-                    type="number"
-                    name="amount"
-                    id="id_amount"
-                    min="1"
-                    class="form-control"
-                    placeholder="0"
-                    required
-                >
+                <input type="number" name="amount" id="id_amount" min="1" class="form-control" required>
                 <span class="currency">{{ wallet.currency }}</span>
             </div>
 
-            <!-- Быстрые суммы -->
             <div class="quick-amounts">
-                <button type="button" onclick="setAmount(1000)">+1 000</button>
-                <button type="button" onclick="setAmount(5000)">+5 000</button>
-                <button type="button" onclick="setAmount(10000)">+10 000</button>
-                <button type="button" onclick="setAmount(50000)">+50 000</button>
-            </div>
-
-            <div id="amount-error" class="errorlist hidden">
-                Сумма должна быть больше 0
+                <button type="button" onclick="addAmount(1000)">+1 000</button>
+                <button type="button" onclick="addAmount(5000)">+5 000</button>
+                <button type="button" onclick="addAmount(10000)">+10 000</button>
+                <button type="button" onclick="addAmount(50000)">+50 000</button>
             </div>
 
             {% if form.amount.errors %}
@@ -217,7 +192,7 @@ label { font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; }
             <label>Категория *</label>
 
             <div class="radio">
-                <input type="radio" checked name="cat_mode" onclick="toggleCat(false)">
+                <input type="radio" name="cat_mode" value="old" checked onclick="toggleCat(false)">
                 <label>Выбрать существующую</label>
             </div>
 
@@ -226,32 +201,25 @@ label { font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; }
             </div>
 
             <div class="radio">
-                <input type="radio" name="cat_mode" onclick="toggleCat(true)">
+                <input type="radio" name="cat_mode" value="new" onclick="toggleCat(true)">
                 <label>Создать новую</label>
             </div>
 
             <div id="cat-new-box" class="hidden">
-                <input
-                    type="text"
-                    name="new_category_name"
-                    class="form-control"
-                    placeholder="Название категории"
-                >
+                <input type="text" name="new_category_name" class="form-control" placeholder="Название категории">
             </div>
         </div>
 
         <!-- ОПИСАНИЕ -->
         <div class="form-group">
             <label>Описание</label>
-            <textarea
-                name="description"
-                rows="2"
-                class="form-control"
-                placeholder="Комментарий..."
-            ></textarea>
+            <textarea name="description" rows="2" class="form-control"></textarea>
         </div>
 
-        <!-- КНОПКА -->
+        {% if form.non_field_errors %}
+            <div class="errorlist">{{ form.non_field_errors }}</div>
+        {% endif %}
+
         <button id="submit-btn" type="submit" class="btn-submit btn-income">
             ✅ Подтвердить доход
         </button>
@@ -260,88 +228,30 @@ label { font-weight: 600; font-size: 14px; margin-bottom: 6px; display: block; }
 </div>
 
 <script>
-const amountInput = document.getElementById('id_amount');
-const amountError = document.getElementById('amount-error');
-const submitBtn = document.getElementById('submit-btn');
-const title = document.getElementById('form-title');
-
-function setType(type) {
+function setType(type){
     document.getElementById('id_type').value = type;
+    document.getElementById('btn-income').classList.toggle('active',type==='income');
+    document.getElementById('btn-outcome').classList.toggle('active',type==='outcome');
 
-    document.getElementById('btn-income').classList.toggle('active', type === 'income');
-    document.getElementById('btn-outcome').classList.toggle('active', type === 'outcome');
+    const btn=document.getElementById('submit-btn');
+    btn.className='btn-submit '+(type==='income'?'btn-income':'btn-outcome');
+    btn.innerText=type==='income'?'✅ Подтвердить доход':'💸 Подтвердить расход';
 
-    submitBtn.className = 'btn-submit ' + (type === 'income' ? 'btn-income' : 'btn-outcome');
-    submitBtn.innerText = type === 'income'
-        ? '✅ Подтвердить доход'
-        : '💸 Подтвердить расход';
-
-    title.innerText = type === 'income'
-        ? '💰 Пополнение баланса'
-        : '📉 Списание средств';
+    document.getElementById('form-title').innerText=
+        type==='income'?'💰 Пополнение баланса':'📉 Списание средств';
 }
 
-function setAmount(value) {
-    let current = parseInt(amountInput.value) || 0;
-    amountInput.value = current + value;
-    validateAmount();
+function toggleCat(isNew){
+    document.getElementById('cat-old-box').classList.toggle('hidden',isNew);
+    document.getElementById('cat-new-box').classList.toggle('hidden',!isNew);
+    document.getElementById('id_category').disabled=isNew;
 }
 
-function validateAmount() {
-    if (amountInput.value <= 0) {
-        amountError.classList.remove('hidden');
-        submitBtn.disabled = true;
-    } else {
-        amountError.classList.add('hidden');
-        submitBtn.disabled = false;
-    }
+function addAmount(val){
+    const i=document.getElementById('id_amount');
+    i.value=(parseInt(i.value)||0)+val;
 }
 
-amountInput.addEventListener('input', validateAmount);
-
-function toggleCat(isNew) {
-    document.getElementById('cat-old-box').classList.toggle('hidden', isNew);
-    document.getElementById('cat-new-box').classList.toggle('hidden', !isNew);
-
-    document.getElementById('id_category').disabled = isNew;
-    document.querySelector('[name="new_category_name"]').disabled = !isNew;
-}
-
-window.onload = () => {
-    setType('income');
-    validateAmount();
-};
+window.onload=()=>setType('income');
 </script>
 {% endblock %}
-
-<script>
-const btnInc = document.getElementById('btn-income');
-const btnOut = document.getElementById('btn-outcome');
-const submitBtn = document.getElementById('submit-btn');
-const title = document.getElementById('form-title');
-
-function setType(type) {
-    document.getElementById('id_type').value = type;
-
-    btnInc.classList.toggle('active', type === 'income');
-    btnOut.classList.toggle('active', type === 'outcome');
-
-    submitBtn.className = 'btn-submit ' + (type === 'income' ? 'btn-income' : 'btn-outcome');
-    submitBtn.innerText = type === 'income' ? '✅ Подтвердить доход' : '💸 Подтвердить расход';
-
-    title.innerText = type === 'income' ? '💰 Пополнение баланса' : '📉 Списание средств';
-}
-
-function toggleCat(isNew) {
-    document.getElementById('cat-old-box').classList.toggle('hidden', isNew);
-    document.getElementById('cat-new-box').classList.toggle('hidden', !isNew);
-
-    document.getElementById('id_category').disabled = isNew;
-    document.querySelector('[name="new_category_name"]').disabled = !isNew;
-}
-
-window.onload = () => {
-    setType('income');
-    toggleCat(false);
-};
-</script>

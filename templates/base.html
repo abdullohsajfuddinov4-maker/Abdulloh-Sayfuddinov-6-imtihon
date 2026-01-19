@@ -279,52 +279,158 @@
 <body>
     <nav>
         <div class="container">
-            <div class="logo">💰 MyFinance</div>
+            <div class="logo">💰 <span data-i18n="logo">MyFinance</span></div>
+
             <ul class="main-menu">
-    <li><a href="{% url 'dashboard' %}">Главная</a></li>
-    <li><a href="{% url 'wallet_list' %}">Кошельки</a></li>
-    <li><a href="{% url 'transfer_create' %}">Междь Карт</a></li>
+                <li><a href="{% url 'dashboard' %}" data-i18n="menu_home">Главная</a></li>
+                <li><a href="{% url 'wallet_list' %}" data-i18n="menu_wallets">Кошельки</a></li>
+                <li><a href="{% url 'transfer_create' %}" data-i18n="menu_transfer">Междь Карт</a></li>
+                <li><a href="{% url 'statistics' %}" data-i18n="menu_statistics">Статистика</a></li>
 
-    {% if wallets %}
-    <li class="dropdown">
-        <a href="#">Управление ▾</a>
-        <ul class="dropdown-menu">
-            {% for wallet in wallets %}
-            <li>
-                <a href="{% url 'transaction_create' wallet.pk %}">
-                    {{ wallet.name }} ({{ wallet.balance|floatformat:0 }} {{ wallet.currency }})
-                </a>
-            </li>
-            {% endfor %}
-        </ul>
-    </li>
-    {% else %}
-    <li><span class="no-wallets">Нет кошельков</span></li>
-    {% endif %}
+                {% if wallets %}
+                <li class="dropdown">
+                    <a href="#" data-i18n="menu_manage">Управление ▾</a>
+                    <ul class="dropdown-menu">
+                        {% for wallet in wallets %}
+                        <li>
+                            <a href="{% url 'transaction_create' wallet.pk %}">
+                                {{ wallet.name }} ({{ wallet.balance|floatformat:0 }} {{ wallet.currency }})
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                {% else %}
+                <li><span class="no-wallets" data-i18n="no_wallets">Нет кошельков</span></li>
+                {% endif %}
 
-    {% if user.is_authenticated %}
-        <li><a href="{% url 'profile' %}">👤 {{ user.username }}</a></li>
-    {% else %}
-        <li><a href="{% url 'login' %}">Войти</a></li>
-    {% endif %}
-</ul>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'profile' %}">👤 {{ user.username }}</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" data-i18n="menu_login">Войти</a></li>
+                {% endif %}
+
+                <!-- Селектор языка -->
+                <li>
+                    <select id="lang-select" style="margin-left: 15px;">
+                        <option value="ru">RU</option>
+                        <option value="uz">UZ</option>
+                        <option value="en">EN</option>
+                    </select>
+                </li>
+            </ul>
         </div>
     </nav>
 
     <div class="container">
-        {% if messages %}
-            <div class="messages">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
         {% block content %}{% endblock %}
     </div>
 
     {% block extra_js %}{% endblock %}
+
+    <script>
+    // Переводы для base + dashboard
+    const translations = {
+        ru: {
+            // Base
+            logo: "MyFinance",
+            menu_home: "Главная",
+            menu_wallets: "Кошельки",
+            menu_transfer: "Междь Карт",
+            menu_statistics: "Статистика",
+            menu_manage: "Управление ▾",
+            no_wallets: "Нет кошельков",
+            menu_login: "Войти",
+
+            // Dashboard / Content
+            overview: "📊 Обзор финансов",
+            total_balance: "💼 Общий баланс",
+            total_usd: "Всего долларов:",
+            total_uzs: "Всего сум:",
+            income: "📈 Доходы",
+            outcome: "📉 Расходы",
+            day: "День",
+            week: "Нед.",
+            month: "Месяц",
+            total_for_period: "Всего за",
+            my_wallets: "👛 Мои кошельки",
+            add_wallet: "+ Добавить",
+            recent_transactions: "🕒 Последние операции",
+            no_transactions: "Операций пока нет"
+        },
+        uz: {
+            logo: "MyFinance",
+            menu_home: "Bosh sahifa",
+            menu_wallets: "Hamyonlar",
+            menu_transfer: "Kartalar o‘rtasi",
+            menu_statistics: "Statistika",
+            menu_manage: "Boshqaruv ▾",
+            no_wallets: "Hamyonlar mavjud emas",
+            menu_login: "Kirish",
+
+            overview: "📊 Moliyaviy ko‘rinish",
+            total_balance: "💼 Umumiy balans",
+            total_usd: "Jami dollar:",
+            total_uzs: "Jami so‘m:",
+            income: "📈 Daromadlar",
+            outcome: "📉 Xarajatlar",
+            day: "Kun",
+            week: "Hafta",
+            month: "Oy",
+            total_for_period: "Jami:",
+            my_wallets: "👛 Mening hamyonlarim",
+            add_wallet: "+ Qo‘shish",
+            recent_transactions: "🕒 So‘nggi operatsiyalar",
+            no_transactions: "Operatsiyalar mavjud emas"
+        },
+        en: {
+            logo: "MyFinance",
+            menu_home: "Home",
+            menu_wallets: "Wallets",
+            menu_transfer: "Transfer",
+            menu_statistics: "Statistics",
+            menu_manage: "Manage ▾",
+            no_wallets: "No wallets",
+            menu_login: "Login",
+
+            overview: "📊 Financial Overview",
+            total_balance: "💼 Total Balance",
+            total_usd: "Total USD:",
+            total_uzs: "Total UZS:",
+            income: "📈 Income",
+            outcome: "📉 Expenses",
+            day: "Day",
+            week: "Week",
+            month: "Month",
+            total_for_period: "Total for",
+            my_wallets: "👛 My Wallets",
+            add_wallet: "+ Add",
+            recent_transactions: "🕒 Recent Transactions",
+            no_transactions: "No transactions yet"
+        }
+    };
+
+    // Общая функция переключения языка для всей страницы
+    function translatePage(lang) {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if(translations[lang][key]) {
+                el.innerText = translations[lang][key];
+            }
+        });
+    }
+
+    // Событие для селектора языка
+    const langSelect = document.getElementById('lang-select');
+    langSelect.addEventListener('change', (e) => {
+        translatePage(e.target.value);
+    });
+
+    // По умолчанию русский
+    translatePage('ru');
+    </script>
 </body>
+
+
+
 </html>

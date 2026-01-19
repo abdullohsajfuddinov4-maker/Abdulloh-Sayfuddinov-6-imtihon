@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 style="margin-bottom: 30px;">📊 Статистика</h1>
+
+<div class="filters">
+    <div class="period-filter">
+        <a href="?period=day"
+           class="period-btn{% if period == 'day' and not request.GET.date %} active{% endif %}">
+            Сегодня
+        </a>
+        <a href="?period=week"
+           class="period-btn{% if period == 'week' and not request.GET.date %} active{% endif %}">
+            Неделя
+        </a>
+        <a href="?period=month"
+           class="period-btn{% if period == 'month' and not request.GET.date %} active{% endif %}">
+            Месяц
+        </a>
+        <a href="{% url 'statistics' %}"
+           class="period-btn{% if not period and not request.GET.date %} active{% endif %}">
+            Всё время
+        </a>
+    </div>
+
+    <form method="get" class="date-filter">
+        <input type="date" name="date" value="{{ request.GET.date }}">
+        <button type="submit" class="period-btn">Показать</button>
+    </form>
+</div>
+
+
+{% if request.GET.date %}
+<div class="period-range">
+    Статистика за <strong>{{ request.GET.date|date:"d.m.Y" }}</strong>
+</div>
+{% elif start_date and end_date %}
+<div class="period-range">
+    Период:
+    <strong>{{ start_date|date:"d.m.Y" }}</strong> —
+    <strong>{{ end_date|date:"d.m.Y" }}</strong>
+</div>
+{% else %}
+<div class="period-range">
+    Период: <strong>Всё время</strong>
+</div>
+{% endif %}
+
+
+
+
+<div class="charts-wrapper">
+
+    <!-- ДОХОДЫ -->
+    <div class="chart-card">
+        <h2>📈 Доходы</h2>
+        <canvas id="incomeChart"></canvas>
+
+        <div class="legend">
+            {% for item in income_stats %}
+                <div class="legend-row">
+                    <span class="dot" style="background: {{ item.color }}"></span>
+                    <span class="name">{{ item.category }}</span>
+                    <span class="amount">{{ item.amount|floatformat:0 }}</span>
+                    <span class="percent">{{ item.percent }}%</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="total">
+            Всего: {{ total_income|floatformat:0 }}
+        </div>
+    </div>
+
+    <!-- РАСХОДЫ -->
+    <div class="chart-card">
+        <h2>📉 Расходы</h2>
+        <canvas id="outcomeChart"></canvas>
+
+        <div class="legend">
+            {% for item in outcome_stats %}
+                <div class="legend-row">
+                    <span class="dot" style="background: {{ item.color }}"></span>
+                    <span class="name">{{ item.category }}</span>
+                    <span class="amount">{{ item.amount|floatformat:0 }}</span>
+                    <span class="percent">{{ item.percent }}%</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="total">
+            Всего: {{ total_outcome|floatformat:0 }}
+        </div>
+    </div>
+
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const incomeData = {
+    labels: [{% for i in income_stats %}'{{ i.category }}',{% endfor %}],
+    datasets: [{
+        data: [{% for i in income_stats %}{{ i.amount }},{% endfor %}],
+        backgroundColor: [{% for i in income_stats %}'{{ i.color }}',{% endfor %}],
+        borderWidth: 0
+    }]
+};
+
+const outcomeData = {
+    labels: [{% for i in outcome_stats %}'{{ i.category }}',{% endfor %}],
+    datasets: [{
+        data: [{% for i in outcome_stats %}{{ i.amount }},{% endfor %}],
+        backgroundColor: [{% for i in outcome_stats %}'{{ i.color }}',{% endfor %}],
+        borderWidth: 0
+    }]
+};
+
+new Chart(document.getElementById('incomeChart'), {
+    type: 'doughnut',
+    data: incomeData,
+    options: {
+        cutout: '70%',
+        plugins: { legend: { display: false } }
+    }
+});
+
+new Chart(document.getElementById('outcomeChart'), {
+    type: 'doughnut',
+    data: outcomeData,
+    options: {
+        cutout: '70%',
+        plugins: { legend: { display: false } }
+    }
+});
+</script>
+
+<style>
+.charts-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 40px;
+}
+
+.chart-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+}
+
+.chart-card h2 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+canvas {
+    max-width: 240px;
+    margin: 0 auto 20px;
+    display: block;
+}
+.filters {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.period-filter {
+    display: flex;
+    gap: 12px;
+}
+
+.period-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #555;
+    background: #f1f1f1;
+    font-weight: 500;
+    transition: 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.period-btn:hover {
+    background: #e0e0e0;
+}
+
+.period-btn.active {
+    background: #1976d2;
+    color: #fff;
+}
+
+.date-filter input {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.period-range {
+    margin-bottom: 25px;
+    font-size: 14px;
+    color: #666;
+}
+
+.charts-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 40px;
+}
+
+.chart-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+}
+
+.chart-card h2 {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+canvas {
+    max-width: 240px;
+    margin: 0 auto 20px;
+    display: block;
+}
+
+.legend-row {
+    display: grid;
+    grid-template-columns: 14px 1fr auto auto;
+    gap: 10px;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.total {
+    margin-top: 15px;
+    font-weight: 700;
+    text-align: center;
+}
+.legend {
+    margin-top: 15px;
+}
+
+.legend-row {
+    display: grid;
+    grid-template-columns: 14px 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.amount {
+    font-weight: 600;
+}
+
+.percent {
+    opacity: 0.7;
+}
+
+.total {
+    margin-top: 15px;
+    font-weight: 700;
+    text-align: center;
+}
+    .period-filter {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 30px;
+}
+
+.period-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    background: #f1f1f1;
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: 0.2s;
+}
+.period-filter {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.period-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #555;
+    background: #f1f1f1;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.period-btn:hover {
+    background: #e0e0e0;
+}
+
+.period-btn.active {
+    background: #2196f3;
+    color: #fff;
+}
+
+.period-btn:hover {
+    background: #e0e0e0;
+}
+
+.period-btn.active {
+    background: #1976d2;
+    color: #fff;
+}
+.period-range {
+    margin-bottom: 25px;
+    font-size: 14px;
+    color: #666;
+}
+
+</style>
+
+{% endblock %}

@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.context_processors import request
+from django.utils import timezone
 from django.views.generic import TemplateView, ListView, CreateView,  DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Sum
@@ -8,6 +10,9 @@ from .models import Transaction, Wallet, Category
 from .forms import  TransactionsCreateForm ,TransferForm
 from django.views import View
 from django.contrib import messages
+
+
+#######################Dashboard#########################
 
 
 class DashboardView(TemplateView):
@@ -117,18 +122,24 @@ class CreateTransactionsView(LoginRequiredMixin,View):
         form = TransactionsCreateForm(user=request.user)
         return render(request,'main/transactions_create.html',{'form':form,'wallet':wallet})
 
-    def post(self,request,pk):
-        wallet = get_object_or_404(Wallet,pk=pk,user=request.user)
-        form = TransactionsCreateForm(request.POST,user=request.user)
-        if form.is_valid():
+    def post(self, request, pk):
+        wallet = get_object_or_404(Wallet, pk=pk, user=request.user)
+        form = TransactionsCreateForm(request.POST, user=request.user)
 
-            category_choice = request.POST.get('category_choice')
+        if form.is_valid():
+            category_choice = request.POST.get('cat_mode')
+
             if category_choice == 'new':
                 name = request.POST.get('new_category_name', '').strip()
                 if not name:
-                    form.add_error('category', 'Название новой категории обязательно!')
+                    form.add_error(None, 'Введите название категории')
                     return render(request, 'main/transactions_create.html', {'form': form, 'wallet': wallet})
-                category = Category.objects.create(user=request.user, name=name, type=form.cleaned_data['type'])
+
+                category = Category.objects.create(
+                    user=request.user,
+                    name=name,
+                    type=form.cleaned_data['type']
+                )
             else:
                 category = form.cleaned_data['category']
 
@@ -139,16 +150,20 @@ class CreateTransactionsView(LoginRequiredMixin,View):
 
             if transaction.type == 'income':
                 wallet.balance += transaction.amount
-            elif transaction.type == 'outcome':
+            else:
                 if wallet.balance < transaction.amount:
-                    form.add_error('amount', 'Сумма больше текущего баланса!')
+                    form.add_error('amount', 'Недостаточно средств')
                     return render(request, 'main/transactions_create.html', {'form': form, 'wallet': wallet})
                 wallet.balance -= transaction.amount
 
             wallet.save()
             transaction.save()
             return redirect('dashboard')
-        return render(request,'main/transactions_create.html',{'form':form,'wallet':wallet})
+
+        return render(request, 'main/transactions_create.html', {'form': form, 'wallet': wallet})
+
+
+# ----------------------------------------------------
 
 
 class TransactionListView(LoginRequiredMixin, ListView):
@@ -295,33 +310,168 @@ class WalletDeleteView(LoginRequiredMixin, DeleteView):
 ####################### transfer ##########################
 
 
-class TransferView(LoginRequiredMixin,View):
-    def get(self,request):
+class TransferView(LoginRequiredMixin, View):
+    def get(self, request):
         form = TransferForm(user=request.user)
-        return render(request,'main/transfer.html',{'form':form})
+        return render(request, 'main/transfer.html', {'form': form})
 
-    def post(self,request):
-        form = TransferForm(request.POST,user=request.user)
+    def post(self, request):
+        form = TransferForm(request.POST, user=request.user)
         if not form.is_valid():
-            return render(request,'main/transfer.html',{'form':form})
+            return render(request, 'main/transfer.html', {'form': form})
 
         from_wallet = form.cleaned_data['from_wallet']
         to_wallet = form.cleaned_data['to_wallet']
-        amount  = form.cleaned_data['amount']
+        amount = form.cleaned_data['amount']
 
         if from_wallet == to_wallet:
             form.add_error(None, 'Нельзя переводить в тот же кошелёк')
-            return render(request,'main/transfer.html',{'form':form})
+            return render(request, 'main/transfer.html', {'form': form})
 
         if from_wallet.balance < amount:
             form.add_error('amount', 'Недостаточно средств')
-            return render(request, 'main/transfer_create.html', {'form': form})
+            return render(request, 'main/transfer.html', {'form': form})
+
+
+        EXCHANGE_RATE = 12000
+
+        if from_wallet.type == to_wallet.type:
+            converted_amount = amount
+
+        elif from_wallet.type == 'uzcard' and to_wallet.type == 'visa':
+            converted_amount = amount / EXCHANGE_RATE
+
+        elif from_wallet.type == 'visa' and to_wallet.type == 'uzcard':
+            converted_amount = amount * EXCHANGE_RATE
+        else:
+            form.add_error(None, 'Невозможно выполнить перевод между этими кошельками')
+            return render(request, 'main/transfer.html', {'form': form})
+
         from_wallet.balance -= amount
-        to_wallet.balance += amount
+        to_wallet.balance += converted_amount
 
         from_wallet.save()
         to_wallet.save()
+
         return redirect('dashboard')
+
+
+
+#####################Statistics############################
+
+
+class StatisticsView(LoginRequiredMixin, TemplateView):
+    template_name = 'main/statistics.html'
+
+    def get_date_range(self):
+        now = timezone.now()
+        period = self.request.GET.get('period')
+        date_str = self.request.GET.get('date')
+
+        if date_str:
+            try:
+                selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                start = timezone.make_aware(
+                    datetime.combine(selected_date, datetime.min.time())
+                )
+                end = timezone.make_aware(
+                    datetime.combine(selected_date, datetime.max.time())
+                )
+                return start, end
+            except ValueError:
+                pass
+
+        if period == 'day':
+            return now - timedelta(days=1), now
+
+        if period == 'week':
+            return now - timedelta(days=7), now
+
+        if period == 'month':
+            return now - timedelta(days=30), now
+
+        return None, None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        user = self.request.user
+        period = self.request.GET.get('period')
+
+        qs = Transaction.objects.filter(
+            user=user,
+            category__isnull=False
+        )
+
+
+        start_date, end_date = self.get_date_range()
+
+        if start_date and end_date:
+            qs = qs.filter(created_at__range=(start_date, end_date))
+
+        outcome_qs = qs.filter(type='outcome')
+        income_qs = qs.filter(type='income')
+
+        total_outcome = outcome_qs.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+
+        total_income = income_qs.aggregate(
+            total=Sum('amount')
+        )['total'] or 0
+
+        by_category_outcome = (
+            outcome_qs
+            .values('category__name')
+            .annotate(total=Sum('amount'))
+        )
+
+        by_category_income = (
+            income_qs
+            .values('category__name')
+            .annotate(total=Sum('amount'))
+        )
+
+        COLORS = ['#4caf50', '#2196f3', '#ff9800', '#9c27b0', '#00bcd4']
+
+        outcome_stats = []
+        for idx, item in enumerate(by_category_outcome):
+            percent = (item['total'] / total_outcome * 100) if total_outcome else 0
+            outcome_stats.append({
+                'category': item['category__name'],
+                'amount': item['total'],
+                'percent': round(percent, 1),
+                'color': COLORS[idx % len(COLORS)]
+            })
+
+        income_stats = []
+        for idx, item in enumerate(by_category_income):
+            percent = (item['total'] / total_income * 100) if total_income else 0
+            income_stats.append({
+                'category': item['category__name'],
+                'amount': item['total'],
+                'percent': round(percent, 1),
+                'color': COLORS[idx % len(COLORS)]
+            })
+
+        context.update({
+            'outcome_stats': outcome_stats,
+            'income_stats': income_stats,
+            'total_outcome': total_outcome,
+            'total_income': total_income,
+            'period': period,
+            'start_date': start_date,
+            'end_date': end_date,
+        })
+
+        return context
+
+
+
+
+
+
+
 
 
 

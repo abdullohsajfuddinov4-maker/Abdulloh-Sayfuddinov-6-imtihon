@@ -90,8 +90,6 @@ class Transaction(models.Model):
         return f'{self.wallet}{self.user}'
 
 
-# -----------Transfer -------
-
 class Transfer(models.Model):
     user = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
     from_wallet = models.ForeignKey(Wallet,on_delete=models.CASCADE,related_name='outgoing_transfers')
@@ -101,3 +99,8 @@ class Transfer(models.Model):
 
     def __str__(self):
         return  f'{self.user}{self.from_wallet}{self.to_wallet}'
+
+
+
+
+
