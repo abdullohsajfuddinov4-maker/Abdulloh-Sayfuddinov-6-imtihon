@@ -25,6 +25,7 @@ class DashboardView(TemplateView):
 
 
 
+
         date_from = self.get_date_from(period)
 
 
