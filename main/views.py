@@ -24,6 +24,7 @@ class DashboardView(TemplateView):
         period = self.request.GET.get('period', 'day')
 
 
+
         date_from = self.get_date_from(period)
 
 
