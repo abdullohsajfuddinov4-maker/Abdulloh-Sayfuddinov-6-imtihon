@@ -1,7 +1,12 @@
 from django.conf import settings
 from django.db import models
-from django.utils.translation import gettext_lazy as _  # Импортируем переводчик
+from django.utils.translation import gettext_lazy as _
 from users.models import CustomUser
+class Wallet(models.Model):
+    name = models.CharField(
+        max_length=100,
+        verbose_name=_('Название кошелька')
+    )
 
 class Category(models.Model):
     TYPES = (
@@ -42,6 +47,7 @@ class Wallet(models.Model):
         related_name='wallets',
         verbose_name=_("Пользователь")
     )
+
     name = models.CharField(_("Название кошелька"), max_length=100)
     type = models.CharField(_("Тип"), max_length=20, choices=TYPE_CHOICES)
     balance = models.DecimalField(_("Баланс"), max_digits=15, decimal_places=2, default=0)

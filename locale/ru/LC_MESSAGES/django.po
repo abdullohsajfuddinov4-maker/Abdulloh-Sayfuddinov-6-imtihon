@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-21 15:21+0500\n"
+"POT-Creation-Date: 2026-01-21 15:56+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,160 +16,209 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || "
+"(n%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: .\config\settings.py:96
+#: .\config\settings.py:97
 msgid "Русский"
-msgstr "Russian"
+msgstr "Русский"
 
+#: .\config\settings.py:98
 msgid "O‘zbek"
-msgstr "Uzbek"
+msgstr "Узбекский"
 
+#: .\config\settings.py:99
 msgid "English"
-msgstr "English"
+msgstr "Английский"
 
+#: .\main\models.py:8 .\main\models.py:51
 msgid "Название кошелька"
-msgstr "Wallet name"
+msgstr "Название кошелька"
 
+#: .\main\models.py:13 .\main\models.py:66
 msgid "Доход"
-msgstr "Income"
+msgstr "Доход"
 
+#: .\main\models.py:14 .\main\models.py:67
 msgid "Расход"
-msgstr "Expense"
+msgstr "Расход"
 
+#: .\main\models.py:19 .\main\models.py:48 .\main\models.py:73
 msgid "Пользователь"
-msgstr "User"
+msgstr "Пользователь"
 
+#: .\main\models.py:21
 msgid "Название категории"
-msgstr "Category name"
+msgstr "Название категории"
 
+#: .\main\models.py:22 .\main\models.py:52
 msgid "Тип"
-msgstr "Type"
+msgstr "Тип"
 
+#: .\main\models.py:25 .\main\models.py:85
 msgid "Категория"
-msgstr "Category"
+msgstr "Категория"
 
+#: .\main\models.py:26
 msgid "Категории"
-msgstr "Categories"
+msgstr "Категории"
 
+#: .\main\models.py:34
 msgid "Наличные"
-msgstr "Cash"
+msgstr "Наличные"
 
+#: .\main\models.py:35
 msgid "bank"
-msgstr "Bank"
+msgstr "Банк"
 
+#: .\main\models.py:36
 msgid "Visa"
 msgstr "Visa"
 
+#: .\main\models.py:40
 msgid "UZS"
-msgstr "UZS"
+msgstr "сум (UZS)"
 
+#: .\main\models.py:41
 msgid "USD"
 msgstr "USD"
 
+#: .\main\models.py:53
 msgid "Баланс"
-msgstr "Balance"
+msgstr "Баланс"
 
+#: .\main\models.py:54
 msgid "Валюта"
-msgstr "Currency"
+msgstr "Валюта"
 
+#: .\main\models.py:57 .\main\models.py:79
 msgid "Кошелек"
-msgstr "Wallet"
+msgstr "Кошелек"
 
+#: .\main\models.py:58 .\templates\base.html:129
 msgid "Кошельки"
-msgstr "Wallets"
+msgstr "Кошельки"
 
-
+#: .\main\models.py:87
 msgid "Тип операции"
-msgstr "Operation type"
+msgstr "Тип операции"
 
+#: .\main\models.py:88
 msgid "Сумма"
-msgstr "Amount"
+msgstr "Сумма"
 
+#: .\main\models.py:89
 msgid "Описание"
-msgstr "Description"
+msgstr "Описание"
 
+#: .\main\models.py:90
 msgid "Дата создания"
-msgstr "Created date"
+msgstr "Дата создания"
 
+#: .\main\models.py:93
 msgid "Транзакция"
-msgstr "Transaction"
+msgstr "Транзакция"
 
+#: .\main\models.py:94
 msgid "Транзакции"
-msgstr "Transactions"
+msgstr "Транзакции"
 
-msgid "Мои финансы"
-msgstr "My finances"
+#: .\templates\base.html:8
+msgid "Мои Финансы"
+msgstr "Мои Финансы"
 
+#: .\templates\base.html:125
 msgid "MyFinance"
 msgstr "MyFinance"
 
+#: .\templates\base.html:128
 msgid "Главная"
-msgstr "Home"
+msgstr "Главная"
 
+#: .\templates\base.html:130
 msgid "Между картами"
-msgstr "Between cards"
+msgstr "Между картами"
 
+#: .\templates\base.html:131
 msgid "Статистика"
-msgstr "Statistics"
+msgstr "Статистика"
 
+#: .\templates\base.html:135
 msgid "Управление"
-msgstr "Management"
+msgstr "Управление"
 
+#: .\templates\base.html:147
 msgid "Нет кошельков"
-msgstr "No wallets"
+msgstr "Нет кошельков"
 
+#: .\templates\base.html:153
 msgid "Войти"
-msgstr "Login"
+msgstr "Войти"
 
+#: .\templates\users\profile.html:107
 msgid "Кошельков"
-msgstr "Wallets"
+msgstr "Кошельков"
 
+#: .\templates\users\profile.html:111
 msgid "Транзакций"
-msgstr "Transactions"
+msgstr "Транзакций"
 
+#: .\templates\users\profile.html:115
 msgid "Категорий"
-msgstr "Categories"
+msgstr "Категорий"
 
+#: .\templates\users\profile.html:121
 msgid "Редактировать профиль"
-msgstr "Edit profile"
+msgstr "Редактировать профиль"
 
+#: .\templates\users\profile.html:127
 msgid "Имя пользователя"
-msgstr "Username"
+msgstr "Имя пользователя"
 
+#: .\templates\users\profile.html:144
 msgid "Email"
-msgstr "Email"
+msgstr "Электронная почта"
 
+#: .\templates\users\profile.html:161
 msgid "Телефон"
-msgstr "Phone"
+msgstr "Телефон"
 
+#: .\templates\users\profile.html:177
 msgid "Адрес"
-msgstr "Address"
+msgstr "Адрес"
 
+#: .\templates\users\profile.html:192
 msgid "Аватар"
-msgstr "Avatar"
+msgstr "Аватар"
 
+#: .\templates\users\profile.html:208
 msgid "Сохранить"
-msgstr "Save"
+msgstr "Сохранить"
 
+#: .\templates\users\profile.html:209
 msgid "Выйти"
-msgstr "Logout"
+msgstr "Выйти"
 
+#: .\venv\Lib\site-packages\django\contrib\messages\apps.py:16
 msgid "Messages"
-msgstr "Messages"
+msgstr "Сообщения"
 
+#: .\venv\Lib\site-packages\django\contrib\sitemaps\apps.py:8
 msgid "Site Maps"
-msgstr "Site Maps"
+msgstr "Карты сайта"
 
+#: .\venv\Lib\site-packages\django\contrib\staticfiles\apps.py:9
 msgid "Static Files"
-msgstr "Static Files"
+msgstr "Статические файлы"
 
+#: .\venv\Lib\site-packages\django\contrib\syndication\apps.py:7
 msgid "Syndication"
-msgstr "Syndication"
+msgstr "Синдикация"
 
+#: .\venv\Lib\site-packages\django\core\paginator.py:33
 msgid "…"
 msgstr "…"
-
 
 #: .\venv\Lib\site-packages\django\core\paginator.py:35
 msgid "That page number is not an integer"
