@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-21 15:21+0500\n"
+"POT-Creation-Date: 2026-01-21 17:24+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,158 +18,293 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: .\config\settings.py:96
+#: .\config\settings.py:97
 msgid "Русский"
 msgstr "Russian"
 
+#: .\config\settings.py:98
 msgid "O‘zbek"
 msgstr "Uzbek"
 
+#: .\config\settings.py:99
 msgid "English"
 msgstr "English"
 
+#: .\main\models.py:8 .\main\models.py:51
 msgid "Название кошелька"
 msgstr "Wallet name"
 
+#: .\main\models.py:13 .\main\models.py:66
 msgid "Доход"
 msgstr "Income"
 
+#: .\main\models.py:14 .\main\models.py:67
 msgid "Расход"
 msgstr "Expense"
 
+#: .\main\models.py:19 .\main\models.py:48 .\main\models.py:73
 msgid "Пользователь"
 msgstr "User"
 
+#: .\main\models.py:21
 msgid "Название категории"
 msgstr "Category name"
 
+#: .\main\models.py:22 .\main\models.py:52
 msgid "Тип"
 msgstr "Type"
 
+#: .\main\models.py:25 .\main\models.py:85
 msgid "Категория"
 msgstr "Category"
 
+#: .\main\models.py:26
 msgid "Категории"
 msgstr "Categories"
 
+#: .\main\models.py:34
 msgid "Наличные"
 msgstr "Cash"
 
+#: .\main\models.py:35
 msgid "bank"
 msgstr "Bank"
 
+#: .\main\models.py:36
 msgid "Visa"
 msgstr "Visa"
 
+#: .\main\models.py:40
 msgid "UZS"
 msgstr "UZS"
 
+#: .\main\models.py:41
 msgid "USD"
 msgstr "USD"
 
+#: .\main\models.py:53
 msgid "Баланс"
 msgstr "Balance"
 
+#: .\main\models.py:54
 msgid "Валюта"
 msgstr "Currency"
 
+#: .\main\models.py:57 .\main\models.py:79
 msgid "Кошелек"
 msgstr "Wallet"
 
+#: .\main\models.py:58 .\templates\main\base.html:22
 msgid "Кошельки"
 msgstr "Wallets"
 
-
+#: .\main\models.py:87
 msgid "Тип операции"
 msgstr "Operation type"
 
+#: .\main\models.py:88
 msgid "Сумма"
 msgstr "Amount"
 
+#: .\main\models.py:89
 msgid "Описание"
 msgstr "Description"
 
+#: .\main\models.py:90
 msgid "Дата создания"
 msgstr "Created date"
 
+#: .\main\models.py:93
 msgid "Транзакция"
 msgstr "Transaction"
 
+#: .\main\models.py:94
 msgid "Транзакции"
 msgstr "Transactions"
 
-msgid "Мои финансы"
+#: .\templates\main\base.html:8
+#, fuzzy
+#| msgid "Мои финансы"
+msgid "Мои Финансы"
 msgstr "My finances"
 
+#: .\templates\main\base.html:18
 msgid "MyFinance"
 msgstr "MyFinance"
 
+#: .\templates\main\base.html:21 .\templates\main\dashboard.html:5
 msgid "Главная"
 msgstr "Home"
 
+#: .\templates\main\base.html:23
 msgid "Между картами"
 msgstr "Between cards"
 
+#: .\templates\main\base.html:24
 msgid "Статистика"
 msgstr "Statistics"
 
+#: .\templates\main\base.html:28
 msgid "Управление"
 msgstr "Management"
 
+#: .\templates\main\base.html:40
 msgid "Нет кошельков"
 msgstr "No wallets"
 
+#: .\templates\main\base.html:46
 msgid "Войти"
 msgstr "Login"
 
+#: .\templates\main\dashboard.html:5
+#, fuzzy
+#| msgid "Мои финансы"
+msgid "Мои финансы"
+msgstr "My finances"
+
+#: .\templates\main\dashboard.html:164
+msgid "Обзор финансов"
+msgstr ""
+
+#: .\templates\main\dashboard.html:171
+#, fuzzy
+#| msgid "Баланс"
+msgid "Общий баланс"
+msgstr "Balance"
+
+#: .\templates\main\dashboard.html:175 .\templates\main\dashboard.html:191
+msgid "сум"
+msgstr ""
+
+#: .\templates\main\dashboard.html:185
+msgid "Итого в долларах"
+msgstr ""
+
+#: .\templates\main\dashboard.html:190
+msgid "Итого в сумах"
+msgstr ""
+
+#: .\templates\main\dashboard.html:198
+#, fuzzy
+#| msgid "Доход"
+msgid "Доходы"
+msgstr "Income"
+
+#: .\templates\main\dashboard.html:202 .\templates\main\dashboard.html:213
+msgid "День"
+msgstr ""
+
+#: .\templates\main\dashboard.html:203 .\templates\main\dashboard.html:214
+msgid "Неделя"
+msgstr ""
+
+#: .\templates\main\dashboard.html:204 .\templates\main\dashboard.html:215
+msgid "Месяц"
+msgstr ""
+
+#: .\templates\main\dashboard.html:209
+#, fuzzy
+#| msgid "Расход"
+msgid "Расходы"
+msgstr "Expense"
+
+#: .\templates\main\dashboard.html:222
+#, fuzzy
+#| msgid "Кошельки"
+msgid "Мои кошельки"
+msgstr "Wallets"
+
+#: .\templates\main\dashboard.html:223
+msgid "Добавить"
+msgstr ""
+
+#: .\templates\main\dashboard.html:233
+#, fuzzy
+#| msgid "Кошельков"
+msgid "Кошельков нет"
+msgstr "Wallets"
+
+#: .\templates\main\dashboard.html:238
+#, fuzzy
+#| msgid "Тип операции"
+msgid "Последние операции"
+msgstr "Operation type"
+
+#: .\templates\main\dashboard.html:250
+#, fuzzy
+#| msgid "Категории"
+msgid "Без категории"
+msgstr "Categories"
+
+#: .\templates\main\dashboard.html:257
+msgid "Операций пока нет"
+msgstr ""
+
+#: .\templates\users\profile.html:107
 msgid "Кошельков"
 msgstr "Wallets"
 
+#: .\templates\users\profile.html:111
 msgid "Транзакций"
 msgstr "Transactions"
 
+#: .\templates\users\profile.html:115
 msgid "Категорий"
 msgstr "Categories"
 
+#: .\templates\users\profile.html:121
 msgid "Редактировать профиль"
 msgstr "Edit profile"
 
+#: .\templates\users\profile.html:127
 msgid "Имя пользователя"
 msgstr "Username"
 
+#: .\templates\users\profile.html:144
 msgid "Email"
 msgstr "Email"
 
+#: .\templates\users\profile.html:161
 msgid "Телефон"
 msgstr "Phone"
 
+#: .\templates\users\profile.html:177
 msgid "Адрес"
 msgstr "Address"
 
+#: .\templates\users\profile.html:192
 msgid "Аватар"
 msgstr "Avatar"
 
+#: .\templates\users\profile.html:208
 msgid "Сохранить"
 msgstr "Save"
 
+#: .\templates\users\profile.html:209
 msgid "Выйти"
 msgstr "Logout"
 
+#: .\venv\Lib\site-packages\django\contrib\messages\apps.py:16
 msgid "Messages"
 msgstr "Messages"
 
+#: .\venv\Lib\site-packages\django\contrib\sitemaps\apps.py:8
 msgid "Site Maps"
 msgstr "Site Maps"
 
+#: .\venv\Lib\site-packages\django\contrib\staticfiles\apps.py:9
 msgid "Static Files"
 msgstr "Static Files"
 
+#: .\venv\Lib\site-packages\django\contrib\syndication\apps.py:7
 msgid "Syndication"
 msgstr "Syndication"
 
+#. Translators: String used to replace omitted page numbers in elided page
+#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
+#: .\venv\Lib\site-packages\django\core\paginator.py:33
 msgid "…"
 msgstr "…"
-
 
 #: .\venv\Lib\site-packages\django\core\paginator.py:35
 msgid "That page number is not an integer"
@@ -464,6 +599,8 @@ msgstr ""
 msgid "Email address"
 msgstr ""
 
+msgid " Тип кошелька"
+msgstr "kashiok turi"
 #: .\venv\Lib\site-packages\django\db\models\fields\__init__.py:1945
 msgid "File path"
 msgstr ""

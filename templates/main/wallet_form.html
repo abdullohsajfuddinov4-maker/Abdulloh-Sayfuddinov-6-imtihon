@@ -1,6 +1,7 @@
-{% extends 'base.html' %}
+{% extends 'main/base.html' %}
+{% load i18n %}
 
-{% block title %}Добавить кошелёк{% endblock %}
+{% block title %}{% trans "Добавить кошелёк" %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -136,12 +137,15 @@
 {% block content %}
 <div class="form-container">
     <div class="form-header">
-        <h1>➕ Добавить кошелёк</h1>
-        <p style="color: #666;">Создайте новый кошелёк для управления финансами</p>
+        <h1>➕ {% trans "Добавить кошелёк" %}</h1>
+        <p style="color: #666;">
+            {% trans "Создайте новый кошелёк для управления финансами" %}
+        </p>
     </div>
 
     <div class="info-box">
-        💡 <strong>Внимание:</strong> Карта VISA не может быть в валюте UZS. Выберите USD для карт VISA.
+        💡 <strong>{% trans "Внимание:" %}</strong>
+        {% trans "Карта VISA не может быть в валюте UZS. Выберите USD для карт VISA." %}
     </div>
 
     {% if form.non_field_errors %}
@@ -155,108 +159,87 @@
     <div class="card">
         <form method="post" id="walletForm">
             {% csrf_token %}
-            
+
             <div class="form-group">
-                <label for="{{ form.name.id_for_label }}">📝 Название кошелька</label>
-                <input type="text" 
-                       name="name" 
-                       class="form-control" 
+                <label for="{{ form.name.id_for_label }}">
+                    📝 {% trans "Название кошелька" %}
+                </label>
+                <input type="text"
+                       name="name"
+                       class="form-control"
                        id="{{ form.name.id_for_label }}"
                        value="{{ form.name.value|default:'' }}"
-                       placeholder="Например: Основная карта, Наличные"
+                       placeholder="{% trans 'Например: Основная карта, Наличные' %}"
                        required>
-                {% if form.name.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.name.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
             </div>
 
             <div class="form-group">
-                <label>💳 Тип кошелька</label>
+                <label>💳 {% trans "Тип кошелька" %}</label>
                 <div class="wallet-type-grid">
                     <div class="type-card" onclick="selectType('cash')">
-                        <input type="radio" name="type" value="cash" id="type_cash">
+                        <input type="radio" name="type" value="cash">
                         <div class="type-icon">💵</div>
-                        <div class="type-label">Наличные</div>
+                        <div class="type-label">{% trans "Наличные" %}</div>
                     </div>
-                    
+
                     <div class="type-card" onclick="selectType('uzcard')">
-                        <input type="radio" name="type" value="uzcard" id="type_uzcard" checked>
+                        <input type="radio" name="type" value="uzcard" checked>
                         <div class="type-icon">💳</div>
-                        <div class="type-label">Banc Cart</div>
+                        <div class="type-label">{% trans "Банковская карта" %}</div>
                     </div>
-                    
+
                     <div class="type-card" onclick="selectType('visa')">
-                        <input type="radio" name="type" value="visa" id="type_visa">
+                        <input type="radio" name="type" value="visa">
                         <div class="type-icon">💎</div>
                         <div class="type-label">Visa</div>
                     </div>
                 </div>
-                {% if form.type.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.type.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
             </div>
 
             <div class="form-group">
-                <label>💰 Валюта</label>
+                <label>💰 {% trans "Валюта" %}</label>
                 <div class="currency-selector">
                     <div class="currency-option" onclick="selectCurrency('UZS')">
-                        <input type="radio" name="currency" value="UZS" id="currency_uzs" checked>
-                        <span class="currency-label">🇺🇿 Сум</span>
+                        <input type="radio" name="currency" value="UZS" checked>
+                        <span class="currency-label">🇺🇿 {% trans "Сум" %}</span>
                         <span class="currency-code">UZS</span>
                     </div>
-                    
+
                     <div class="currency-option" onclick="selectCurrency('USD')">
-                        <input type="radio" name="currency" value="USD" id="currency_usd">
-                        <span class="currency-label">🇺🇸 Доллар</span>
+                        <input type="radio" name="currency" value="USD">
+                        <span class="currency-label">🇺🇸 {% trans "Доллар" %}</span>
                         <span class="currency-code">USD</span>
                     </div>
                 </div>
-                {% if form.currency.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.currency.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
             </div>
 
             <div class="form-group">
-                <label for="{{ form.balance.id_for_label }}">💵 Начальный баланс</label>
-                <input type="number" 
-                       name="balance" 
+                <label for="{{ form.balance.id_for_label }}">
+                    💵 {% trans "Начальный баланс" %}
+                </label>
+                <input type="number"
+                       name="balance"
                        step="0.01"
-                       class="form-control" 
+                       class="form-control"
                        id="{{ form.balance.id_for_label }}"
                        value="{{ form.balance.value|default:'0' }}"
                        placeholder="0.00">
-                <span style="font-size: 13px; color: #999; margin-top: 5px; display: block;">
-                    Укажите текущую сумму в этом кошельке
+                <span style="font-size: 13px; color: #999;">
+                    {% trans "Укажите текущую сумму в этом кошельке" %}
                 </span>
-                {% if form.balance.errors %}
-                    <ul class="errorlist">
-                        {% for error in form.balance.errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
             </div>
 
             <div style="display: flex; gap: 15px; margin-top: 30px;">
-                <a href="{% url 'wallet_list' %}" class="btn btn-secondary" style="flex: 1;">Отмена</a>
-                <button type="submit" class="btn" style="flex: 1;">✅ Создать кошелёк</button>
+                <a href="{% url 'wallet_list' %}" class="btn btn-secondary" style="flex: 1;">
+                    {% trans "Отмена" %}
+                </a>
+                <button type="submit" class="btn" style="flex: 1;">
+                    ✅ {% trans "Создать кошелёк" %}
+                </button>
             </div>
         </form>
     </div>
 </div>
-
 <script>
     function selectType(type) {
         document.querySelectorAll('.type-card').forEach(card => {
@@ -264,7 +247,7 @@
         });
         event.currentTarget.classList.add('active');
         document.getElementById('type_' + type).checked = true;
-        
+
         if (type === 'visa') {
             const uzsOption = document.getElementById('currency_uzs');
             if (uzsOption.checked) {
@@ -273,7 +256,7 @@
             }
         }
     }
-    
+
     function selectCurrency(currency) {
         document.querySelectorAll('.currency-option').forEach(option => {
             option.classList.remove('active');
@@ -281,13 +264,13 @@
         event.currentTarget.classList.add('active');
         document.getElementById('currency_' + currency.toLowerCase()).checked = true;
     }
-    
+
     document.addEventListener('DOMContentLoaded', function() {
         const checkedType = document.querySelector('input[name="type"]:checked');
         if (checkedType) {
             checkedType.closest('.type-card').classList.add('active');
         }
-        
+
         const checkedCurrency = document.querySelector('input[name="currency"]:checked');
         if (checkedCurrency) {
             checkedCurrency.closest('.currency-option').classList.add('active');
@@ -295,3 +278,8 @@
     });
 </script>
 {% endblock %}
+
+
+
+
+

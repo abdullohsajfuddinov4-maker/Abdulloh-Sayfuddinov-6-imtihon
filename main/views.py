@@ -299,11 +299,6 @@ class WalletDeleteView(LoginRequiredMixin, DeleteView):
 
     def delete(self, request, *args, **kwargs):
         wallet = self.get_object()
-
-        if wallet.transactions.exists():
-            messages.error(request, 'Нельзя удалить кошелёк с транзакциями')
-            return redirect('wallet_list')
-
         messages.success(request, f'Кошелёк "{wallet.name}" удалён')
         return super().delete(request, *args, **kwargs)
 

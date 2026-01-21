@@ -7,7 +7,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% trans "Мои Финансы" %}{% endblock %}</title>
 
-    <style>
+
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<nav>
+    <div class="container">
+        <div class="logo">💰 {% trans "MyFinance" %}</div>
+
+        <ul class="main-menu">
+            <li><a href="{% url 'dashboard' %}">{% trans "Главная" %}</a></li>
+            <li><a href="{% url 'wallet_list' %}">{% trans "Кошельки" %}</a></li>
+            <li><a href="{% url 'transfer_create' %}">{% trans "Между картами" %}</a></li>
+            <li><a href="{% url 'statistics' %}">{% trans "Статистика" %}</a></li>
+
+            {% if wallets %}
+                <li class="dropdown">
+                    <a href="#">{% trans "Управление" %} ▾</a>
+                    <ul class="dropdown-menu">
+                        {% for wallet in wallets %}
+                            <li>
+                                <a href="{% url 'transaction_create' wallet.pk %}">
+                                    {{ wallet.name }} ({{ wallet.balance|floatformat:0 }} {{ wallet.currency }})
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% else %}
+                <li class="no-wallets">{% trans "Нет кошельков" %}</li>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'profile' %}">👤 {{ user.username }}</a></li>
+            {% else %}
+                <li><a href="{% url 'login' %}">{% trans "Войти" %}</a></li>
+            {% endif %}
+
+            <li>
+    <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.path }}">
+        <select name="language" onchange="this.form.submit()">
+            <option value="ru" {% if CURRENT_LANGUAGE == 'ru' %}selected{% endif %}>RU</option>
+            <option value="uz" {% if CURRENT_LANGUAGE == 'uz' %}selected{% endif %}>UZ</option>
+            <option value="en" {% if CURRENT_LANGUAGE == 'en' %}selected{% endif %}>EN</option>
+        </select>
+    </form>
+</li>
+
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    {% block content %}{% endblock %}
+</div>
+
+{% block extra_js %}{% endblock %}
+<style>
         * {
             margin: 0;
             padding: 0;
@@ -115,65 +175,5 @@
             }
         }
     </style>
-
-    {% block extra_css %}{% endblock %}
-</head>
-<body>
-
-<nav>
-    <div class="container">
-        <div class="logo">💰 {% trans "MyFinance" %}</div>
-
-        <ul class="main-menu">
-            <li><a href="{% url 'dashboard' %}">{% trans "Главная" %}</a></li>
-            <li><a href="{% url 'wallet_list' %}">{% trans "Кошельки" %}</a></li>
-            <li><a href="{% url 'transfer_create' %}">{% trans "Между картами" %}</a></li>
-            <li><a href="{% url 'statistics' %}">{% trans "Статистика" %}</a></li>
-
-            {% if wallets %}
-                <li class="dropdown">
-                    <a href="#">{% trans "Управление" %} ▾</a>
-                    <ul class="dropdown-menu">
-                        {% for wallet in wallets %}
-                            <li>
-                                <a href="{% url 'transaction_create' wallet.pk %}">
-                                    {{ wallet.name }} ({{ wallet.balance|floatformat:0 }} {{ wallet.currency }})
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </li>
-            {% else %}
-                <li class="no-wallets">{% trans "Нет кошельков" %}</li>
-            {% endif %}
-
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'profile' %}">👤 {{ user.username }}</a></li>
-            {% else %}
-                <li><a href="{% url 'login' %}">{% trans "Войти" %}</a></li>
-            {% endif %}
-
-            <li>
-    <form action="{% url 'set_language' %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ request.path }}">
-        <select name="language" onchange="this.form.submit()">
-            <option value="ru" {% if CURRENT_LANGUAGE == 'ru' %}selected{% endif %}>RU</option>
-            <option value="uz" {% if CURRENT_LANGUAGE == 'uz' %}selected{% endif %}>UZ</option>
-            <option value="en" {% if CURRENT_LANGUAGE == 'en' %}selected{% endif %}>EN</option>
-        </select>
-    </form>
-</li>
-
-        </ul>
-    </div>
-</nav>
-
-<div class="container">
-    {% block content %}{% endblock %}
-</div>
-
-{% block extra_js %}{% endblock %}
-
 </body>
 </html>
